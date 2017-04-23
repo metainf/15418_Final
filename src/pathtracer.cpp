@@ -501,7 +501,7 @@ Spectrum PathTracer::raytrace_pixel(size_t x, size_t y) {
   double h = (double)frameBuffer.h;
   int num_samples = ns_aa;
   Spectrum avg = Spectrum(0,0,0);
-  if( num_samples == 1)
+  if(num_samples == 1)
   {
     Vector2D p = Vector2D((x+0.5)/w,(y+0.5)/h);
     avg = trace_ray(camera->generate_ray(p.x, p.y));
@@ -519,6 +519,7 @@ Spectrum PathTracer::raytrace_pixel(size_t x, size_t y) {
     avg.g = avg.g/num_samples;
     avg.b = avg.b/num_samples;
   }
+  //printf("r:%f, g:%f, b:%f\n",avg.r,avg.g,avg.b);
   return avg;
 
 }

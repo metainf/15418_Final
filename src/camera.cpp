@@ -114,12 +114,18 @@ Ray Camera::generate_ray(double x, double y) const {
   // TODO:
   // compute position of the input sensor sample coordinate on the
   // canonical sensor plane one unit away from the pinhole.
-  Vector3D p1 = Vector3D(0,0,0);
-  Vector3D p2 = Vector3D(x-.5,(y-.5)*-1,1);
-  p1 = p1 + pos;
-  p2 = (c2w*p2) + pos;
+  Vector3D sp_cam = Vector3D(-(x-.5)*screenW/screenDist,
+                         -(y-.5)*screenH/screenDist,1);
+  Vector3D dir_cam = -sp_cam;
+  
+  Vector3D sp_world = (c2w*sp_cam + pos);
+  Vector3D dir_world = c2w*dir_cam;
+  dir_world.normalize();
+  
+  //std::cout << "p1" << p1 << "\n";
+  //std::cout << "p2" << p2 << "\n";
 
-  return Ray(p1, p2);
+  return Ray(sp_world,dir_world);
 }
 
 

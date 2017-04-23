@@ -19,9 +19,9 @@ BBox Triangle::get_bbox() const {
 bool Triangle::intersect(const Ray& r) const {
   
   // TODO: implement ray-triangle intersection
-  Vector3D e1 = mesh->position[v2] - mesh->position[v1];
-  Vector3D e2 = mesh->position[v3] - mesh->position[v1];
-  Vector3D s = r.o - mesh->position[v1];
+  Vector3D e1 = mesh->positions[v2] - mesh->positions[v1];
+  Vector3D e2 = mesh->positions[v3] - mesh->positions[v1];
+  Vector3D s = r.o - mesh->positions[v1];
 
   Vector3D e1Xd = cross(e1,r.d);
   Vector3D sXe2 = cross(s,e2);
@@ -31,16 +31,19 @@ bool Triangle::intersect(const Ray& r) const {
   if(denom == 0)
     return false;
 
-  double u1 = -dot(sXe2, r.d);
-  double v1 = dot(e1Xd, s);
-  double t1 = -dot(sXe2, e1);
+  double u = -dot(sXe2, r.d);
+  double v = dot(e1Xd, s);
+  double t = -dot(sXe2, e1);
 
-  Vector3D sol = 1/denom * Vector3D(u1,v1,t1);
+  Vector3D sol = 1/denom * Vector3D(u,v,t);
 
   if(0 <= sol[0] && sol[0] < 1 && 
      0 <= sol[1] && sol[1] < 1 &&
      r.min_t <= sol[2] && sol[2] <= r.max_t)
+  {
+    r.max_t = sol[2];
     return true;
+  }
   
   return false;
 }
@@ -51,9 +54,9 @@ bool Triangle::intersect(const Ray& r, Intersection *isect) const {
   // implement ray-triangle intersection. When an intersection takes
   // place, the Intersection data should be updated accordingly
   
-  Vector3D e1 = mesh->position[v2] - mesh->position[v1];
-  Vector3D e2 = mesh->position[v3] - mesh->position[v1];
-  Vector3D s = r.o - mesh->position[v1];
+  Vector3D e1 = mesh->positions[v2] - mesh->positions[v1];
+  Vector3D e2 = mesh->positions[v3] - mesh->positions[v1];
+  Vector3D s = r.o - mesh->positions[v1];
 
   Vector3D e1Xd = cross(e1,r.d);
   Vector3D sXe2 = cross(s,e2);
@@ -63,26 +66,31 @@ bool Triangle::intersect(const Ray& r, Intersection *isect) const {
   if(denom == 0)
     return false;
 
-  double u1 = -dot(sXe2, r.d);
-  double v1 = dot(e1Xd, s);
-  double t1 = -dot(sXe2, e1);
+  double u = -dot(sXe2, r.d);
+  double v = dot(e1Xd, s);
+  double t = -dot(sXe2, e1);
 
-  Vector3D sol = 1/denom * Vector3D(u1,v1,t1);
 
-  if(0 <= sol[0] && sol[0] < 1 && 
-     0 <= sol[1] && sol[1] < 1 &&
+  Vector3D sol = 1/denom * Vector3D(u,v,t);
+
+  //printf("u:%f, v:%f, t:%f ",sol[0],sol[1],sol[2]);
+
+  if(0 <= sol[0] && sol[0] + sol[1] < 1 && 
+     0 <= sol[1] &&
      r.min_t <= sol[2] && sol[2] <= r.max_t)
   {
+    //printf("intersect\n");
     Vector3D poi = r.o + sol[2] * r.d;
     isect->t = sol[2];
     r.max_t = sol[2];
     isect->primitive = this;
-    isect->n = ((poi - mesh->position[v1]).norm() * mesh->normals[v1] +
-                (poi - mesh->position[v2]).norm() * mesh->normals[v2] +
-                (poi - mesh->position[v3]).norm() * mesh->normals[v3]).unit();
-    isect->bsdf = get_bsfd();
+    isect->n = ((poi - mesh->positions[v1]).norm() * mesh->normals[v1] +
+                (poi - mesh->positions[v2]).norm() * mesh->normals[v2] +
+                (poi - mesh->positions[v3]).norm() * mesh->normals[v3]).unit();
+    isect->bsdf = get_bsdf();
     return true;
   }
+  //printf("miss\n");
   
   return false;
 }
