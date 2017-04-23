@@ -8,8 +8,11 @@ Vector2D UniformGridSampler2D::get_sample() const {
 
   // TODO:
   // Implement uniform 2D grid sampler
+  double x = (double)(std::rand()) / RAND_MAX;
+  double y = (double)(std::rand()) / RAND_MAX;
 
-  return Vector2D(0.5,0.5);
+
+  return Vector2D(x,y);
 
 }
 

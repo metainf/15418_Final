@@ -497,16 +497,34 @@ Spectrum PathTracer::raytrace_pixel(size_t x, size_t y) {
   // TODO:
   // Sample the pixel with coordinate (x,y) and return the result spectrum.
   // The sample rate is given by the number of camera rays per pixel.
-
+  double w = (double)frameBuffer.w;
+  double h = (double)frameBuffer.h;
   int num_samples = ns_aa;
-
-  Vector2D p = Vector2D(0.5,0.5);
-  return trace_ray(camera->generate_ray(p.x, p.y));
+  Spectrum avg = Spectrum(0,0,0);
+  if( num_samples == 1)
+  {
+    Vector2D p = Vector2D((x+0.5)/w,(y+0.5)/h);
+    avg = trace_ray(camera->generate_ray(p.x, p.y));
+  }
+  else
+  {
+    for(int i = 0; i < num_samples; i++)
+    {
+      Vector2D p = Vector2D(x,y) + gridSampler->get_sample();
+      p.x = p.x/w;
+      p.y = p.y/h;
+      avg += trace_ray(camera->generate_ray(p.x, p.y));
+    }
+    avg.r = avg.r/num_samples;
+    avg.g = avg.g/num_samples;
+    avg.b = avg.b/num_samples;
+  }
+  return avg;
 
 }
 
 void PathTracer::raytrace_tile(int tile_x, int tile_y,
-                               int tile_w, int tile_h) {
+    int tile_w, int tile_h) {
 
   size_t w = sampleBuffer.w;
   size_t h = sampleBuffer.h;
@@ -524,8 +542,8 @@ void PathTracer::raytrace_tile(int tile_x, int tile_y,
   for (size_t y = tile_start_y; y < tile_end_y; y++) {
     if (!continueRaytracing) return;
     for (size_t x = tile_start_x; x < tile_end_x; x++) {
-        Spectrum s = raytrace_pixel(x, y);
-        sampleBuffer.update_pixel(s, x, y);
+      Spectrum s = raytrace_pixel(x, y);
+      sampleBuffer.update_pixel(s, x, y);
     }
   }
 
