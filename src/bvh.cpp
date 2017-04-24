@@ -27,6 +27,14 @@ BVHAccel::BVHAccel(const std::vector<Primitive *> &_primitives,
   }
 
   root = new BVHNode(bb, 0, primitives.size());
+  stack<BVHNode*> node_split;
+  node_split.push(root);
+  while(!node_split.empty())
+  {
+    //TODO:
+    // calculate the best partition
+    BVHNode* split_node = node_split.pop();
+  }
 
 }
 

@@ -33,6 +33,8 @@ struct BVHNode {
   BVHNode* r;     ///< right child node
 };
 
+
+
 /**
  * Bounding Volume Hierarchy for fast Ray - Primitive intersection.
  * Note that the BVHAccel is an Aggregate (A Primitive itself) that contains
