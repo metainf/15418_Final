@@ -38,8 +38,23 @@ BVHAccel::BVHAccel(const std::vector<Primitive *> &_primitives,
 
     // Sort the range of the primitives of the node by an axis
     // For now, using only the x axis
-    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_x);
     // 
+    bucket = new p_bucket[BUCKET_NUM];
+    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_x);
+    float step = ((primitives.begin() + sn->start + sn->range).x - (primitives.begin() + sn->start).x)/BUCKET_NUM;
+    float init = (primitives.begin() + sn->start).x;
+    Primitive *p = primitives.begin() + sn->start;
+    for(size_t j = 0; j < sn->range; j++)
+      int b = ((p + j).x - init) / step;
+    }
+    //calculate bucket information and store it in an array[bucketsize]
+    //calculate the initial partition, 1:Bucketsize - 1 
+    for(size_t j = 1; j < BUCKET_NUM; j++) {
+      //for each bucket, calculate SAH
+      //union partition into left partition and remove from right
+    }
+    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_y);
+    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_z);
 
     node_split.pop();
   }
