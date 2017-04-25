@@ -71,6 +71,11 @@ namespace CMU462 { namespace StaticScene {
    */
   void drawOutline(const Color& c) const;
 
+  /**
+   * Returns the centroid of the triangle
+   */
+  Vector3D get_center();
+
  private:
 
   const Mesh* mesh;   ///< pointer to the mesh the triangle is a part of
@@ -78,6 +83,8 @@ namespace CMU462 { namespace StaticScene {
   size_t v1; ///< index into the mesh attribute arrays
   size_t v2; ///< index into the mesh attribute arrays
   size_t v3; ///< index into the mesh attribute arrays
+
+  Vector3D centroid;
 
 }; // class Triangle
 

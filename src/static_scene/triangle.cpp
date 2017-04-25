@@ -5,135 +5,146 @@
 
 namespace CMU462 { namespace StaticScene {
 
-Triangle::Triangle(const Mesh* mesh, size_t v1, size_t v2, size_t v3) :
-    mesh(mesh), v1(v1), v2(v2), v3(v3) { }
+  Triangle::Triangle(const Mesh* mesh, size_t v1, size_t v2, size_t v3) :
+    mesh(mesh), v1(v1), v2(v2), v3(v3) {
 
-BBox Triangle::get_bbox() const {
-  
-  // TODO: 
-  // compute the bounding box of the triangle
-  Vector3D p1 = mesh->positions[v1];
-  Vector3D p2 = mesh->positions[v2];
-  Vector3D p3 = mesh->positions[v3];
+      Vector3D p1 = mesh->positions[v1];
+      Vector3D p2 = mesh->positions[v2];
+      Vector3D p3 = mesh->positions[v3];
 
-  Vector3D min = Vector3D(std::min(p1.x,std::min(p2.x,p3.x)),
-                          std::min(p1.y,std::min(p2.y,p3.y)),
-                          std::min(p1.z,std::min(p2.z,p3.z)));
+      centroid = (p1 + p2 + p3)/3;
+    }
 
-  Vector3D max = Vector3D(std::max(p1.x,std::max(p2.x,p3.x)),
-                          std::max(p1.y,std::max(p2.y,p3.y)),
-                          std::max(p1.z,std::max(p2.z,p3.z)));
-  return BBox(min,max);
-}
+  BBox Triangle::get_bbox() const {
 
-bool Triangle::intersect(const Ray& r) const {
-  
-  // TODO: implement ray-triangle intersection
-  Vector3D e1 = mesh->positions[v2] - mesh->positions[v1];
-  Vector3D e2 = mesh->positions[v3] - mesh->positions[v1];
-  Vector3D s = r.o - mesh->positions[v1];
+    // TODO: 
+    // compute the bounding box of the triangle
+    Vector3D p1 = mesh->positions[v1];
+    Vector3D p2 = mesh->positions[v2];
+    Vector3D p3 = mesh->positions[v3];
 
-  Vector3D e1Xd = cross(e1,r.d);
-  Vector3D sXe2 = cross(s,e2);
+    Vector3D min = Vector3D(std::min(p1.x,std::min(p2.x,p3.x)),
+        std::min(p1.y,std::min(p2.y,p3.y)),
+        std::min(p1.z,std::min(p2.z,p3.z)));
 
-  double denom = dot(e1Xd, e2);
-
-  if(denom == 0)
-    return false;
-
-  double u = -dot(sXe2, r.d);
-  double v = dot(e1Xd, s);
-  double t = -dot(sXe2, e1);
-
-  Vector3D sol = 1/denom * Vector3D(u,v,t);
-
-  if(0 <= sol[0] && sol[0] < 1 && 
-     0 <= sol[1] && sol[1] < 1 &&
-     r.min_t <= sol[2] && sol[2] <= r.max_t)
-  {
-    r.max_t = sol[2];
-    return true;
+    Vector3D max = Vector3D(std::max(p1.x,std::max(p2.x,p3.x)),
+        std::max(p1.y,std::max(p2.y,p3.y)),
+        std::max(p1.z,std::max(p2.z,p3.z)));
+    return BBox(min,max);
   }
-  
-  return false;
-}
 
-bool Triangle::intersect(const Ray& r, Intersection *isect) const {
-  
-  // TODO: 
-  // implement ray-triangle intersection. When an intersection takes
-  // place, the Intersection data should be updated accordingly
-  
-  Vector3D e1 = mesh->positions[v2] - mesh->positions[v1];
-  Vector3D e2 = mesh->positions[v3] - mesh->positions[v1];
-  Vector3D s = r.o - mesh->positions[v1];
+  bool Triangle::intersect(const Ray& r) const {
 
-  Vector3D e1Xd = cross(e1,r.d);
-  Vector3D sXe2 = cross(s,e2);
+    // TODO: implement ray-triangle intersection
+    Vector3D e1 = mesh->positions[v2] - mesh->positions[v1];
+    Vector3D e2 = mesh->positions[v3] - mesh->positions[v1];
+    Vector3D s = r.o - mesh->positions[v1];
 
-  double denom = dot(e1Xd, e2);
+    Vector3D e1Xd = cross(e1,r.d);
+    Vector3D sXe2 = cross(s,e2);
 
-  if(denom == 0)
+    double denom = dot(e1Xd, e2);
+
+    if(denom == 0)
+      return false;
+
+    double u = -dot(sXe2, r.d);
+    double v = dot(e1Xd, s);
+    double t = -dot(sXe2, e1);
+
+    Vector3D sol = 1/denom * Vector3D(u,v,t);
+
+    if(0 <= sol[0] && sol[0] < 1 && 
+        0 <= sol[1] && sol[1] < 1 &&
+        r.min_t <= sol[2] && sol[2] <= r.max_t)
+    {
+      r.max_t = sol[2];
+      return true;
+    }
+
     return false;
-
-  double u = -dot(sXe2, r.d);
-  double v = dot(e1Xd, s);
-  double t = -dot(sXe2, e1);
-
-
-  Vector3D sol = 1/denom * Vector3D(u,v,t);
-
-  //printf("u:%f, v:%f, t:%f ",sol[0],sol[1],sol[2]);
-
-  if(0 <= sol[0] && sol[0] + sol[1] < 1 && 
-     0 <= sol[1] &&
-     r.min_t <= sol[2] && sol[2] <= r.max_t)
-  {
-    //printf("intersect\n");
-    Vector3D poi = r.o + sol[2] * r.d;
-    isect->t = sol[2];
-    r.max_t = sol[2];
-    isect->primitive = this;
-    isect->n = ((poi - mesh->positions[v1]).norm() * mesh->normals[v1] +
-                (poi - mesh->positions[v2]).norm() * mesh->normals[v2] +
-                (poi - mesh->positions[v3]).norm() * mesh->normals[v3]).unit();
-    isect->bsdf = get_bsdf();
-    return true;
   }
-  //printf("miss\n");
-  
-  return false;
-}
 
-void Triangle::draw(const Color& c) const {
-  glColor4f(c.r, c.g, c.b, c.a);
-  glBegin(GL_TRIANGLES);
-  glVertex3d(mesh->positions[v1].x,
-             mesh->positions[v1].y,
-             mesh->positions[v1].z);
-  glVertex3d(mesh->positions[v2].x,
-             mesh->positions[v2].y,
-             mesh->positions[v2].z);
-  glVertex3d(mesh->positions[v3].x,
-             mesh->positions[v3].y,
-             mesh->positions[v3].z);
-  glEnd();
-}
+  bool Triangle::intersect(const Ray& r, Intersection *isect) const {
 
-void Triangle::drawOutline(const Color& c) const {
-  glColor4f(c.r, c.g, c.b, c.a);
-  glBegin(GL_LINE_LOOP);
-  glVertex3d(mesh->positions[v1].x,
-             mesh->positions[v1].y,
-             mesh->positions[v1].z);
-  glVertex3d(mesh->positions[v2].x,
-             mesh->positions[v2].y,
-             mesh->positions[v2].z);
-  glVertex3d(mesh->positions[v3].x,
-             mesh->positions[v3].y,
-             mesh->positions[v3].z);
-  glEnd();
-}
+    // TODO: 
+    // implement ray-triangle intersection. When an intersection takes
+    // place, the Intersection data should be updated accordingly
+
+    Vector3D e1 = mesh->positions[v2] - mesh->positions[v1];
+    Vector3D e2 = mesh->positions[v3] - mesh->positions[v1];
+    Vector3D s = r.o - mesh->positions[v1];
+
+    Vector3D e1Xd = cross(e1,r.d);
+    Vector3D sXe2 = cross(s,e2);
+
+    double denom = dot(e1Xd, e2);
+
+    if(denom == 0)
+      return false;
+
+    double u = -dot(sXe2, r.d);
+    double v = dot(e1Xd, s);
+    double t = -dot(sXe2, e1);
+
+
+    Vector3D sol = 1/denom * Vector3D(u,v,t);
+
+    //printf("u:%f, v:%f, t:%f ",sol[0],sol[1],sol[2]);
+
+    if(0 <= sol[0] && sol[0] + sol[1] < 1 && 
+        0 <= sol[1] &&
+        r.min_t <= sol[2] && sol[2] <= r.max_t)
+    {
+      //printf("intersect\n");
+      Vector3D poi = r.o + sol[2] * r.d;
+      isect->t = sol[2];
+      r.max_t = sol[2];
+      isect->primitive = this;
+      isect->n = ((poi - mesh->positions[v1]).norm() * mesh->normals[v1] +
+          (poi - mesh->positions[v2]).norm() * mesh->normals[v2] +
+          (poi - mesh->positions[v3]).norm() * mesh->normals[v3]).unit();
+      isect->bsdf = get_bsdf();
+      return true;
+    }
+    //printf("miss\n");
+
+    return false;
+  }
+
+  void Triangle::draw(const Color& c) const {
+    glColor4f(c.r, c.g, c.b, c.a);
+    glBegin(GL_TRIANGLES);
+    glVertex3d(mesh->positions[v1].x,
+        mesh->positions[v1].y,
+        mesh->positions[v1].z);
+    glVertex3d(mesh->positions[v2].x,
+        mesh->positions[v2].y,
+        mesh->positions[v2].z);
+    glVertex3d(mesh->positions[v3].x,
+        mesh->positions[v3].y,
+        mesh->positions[v3].z);
+    glEnd();
+  }
+
+  void Triangle::drawOutline(const Color& c) const {
+    glColor4f(c.r, c.g, c.b, c.a);
+    glBegin(GL_LINE_LOOP);
+    glVertex3d(mesh->positions[v1].x,
+        mesh->positions[v1].y,
+        mesh->positions[v1].z);
+    glVertex3d(mesh->positions[v2].x,
+        mesh->positions[v2].y,
+        mesh->positions[v2].z);
+    glVertex3d(mesh->positions[v3].x,
+        mesh->positions[v3].y,
+        mesh->positions[v3].z);
+    glEnd();
+  }
+
+  Vector3D Triangle::get_center(){
+    return centroid;
+  }
 
 
 

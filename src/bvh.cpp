@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <stack>
+#include <algorithm>
 
 using namespace std;
 
@@ -27,15 +28,21 @@ BVHAccel::BVHAccel(const std::vector<Primitive *> &_primitives,
   }
 
   root = new BVHNode(bb, 0, primitives.size());
+
   stack<BVHNode*> node_split;
   node_split.push(root);
+
   while(!node_split.empty())
   {
-    //TODO:
-    // calculate the best partition
-    BVHNode* split_node = node_split.pop();
-  }
+    BVHNode* sn = node_split.top();
 
+    // Sort the range of the primitives of the node by an axis
+    // For now, using only the x axis
+    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_x);
+    // 
+
+    node_split.pop();
+  }
 }
 
 BVHAccel::~BVHAccel() {

@@ -62,6 +62,37 @@ class Primitive {
    */
   virtual void drawOutline(const Color& c) const = 0;
 
+  /**
+   * Get the center/centroid of the primitive
+   */
+  virtual Vector3D get_center(){return Vector3D(0,0,0);};
+
+  /**
+   * Compares the center/centroid of the two primitives along the x axis
+   */
+
+  static bool comp_x(Primitive* i, Primitive* j)
+  {
+    return i->get_center().x > j->get_center().x;
+  }
+  
+  /**
+   * Compares the center/centroid of the two primitives along the y axis
+   */
+
+  static bool comp_y(Primitive* i, Primitive* j)
+  {
+    return i->get_center().y > j->get_center().y;
+  }
+
+  /**
+   * Compares the center/centroid of the two primitives along the x axis
+   */
+
+  static bool comp_z(Primitive* i, Primitive* j)
+  {
+    return i->get_center().z > j->get_center().z;
+  }
 };
 
 } // namespace StaticScene

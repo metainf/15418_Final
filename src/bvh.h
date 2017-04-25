@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#define BUCKET_NUM 4
+
 namespace CMU462 { namespace StaticScene {
 
 
@@ -33,7 +35,9 @@ struct BVHNode {
   BVHNode* r;     ///< right child node
 };
 
-
+struct p_bucket {
+  BBox bb;
+  
 
 /**
  * Bounding Volume Hierarchy for fast Ray - Primitive intersection.
