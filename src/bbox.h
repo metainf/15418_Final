@@ -57,9 +57,7 @@ struct BBox {
     min = Vector3D(minX, minY, minZ);
     max = Vector3D(maxX, maxY, maxZ);
 		extent = max - min;
-  }
-
-  /**
+  } /**
    * Expand the bounding box to include another (union).
    * If the given bounding box is contained within *this*, nothing happens.
    * Otherwise *this* is expanded to the minimum volume that contains the

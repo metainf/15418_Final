@@ -37,8 +37,8 @@ struct BVHNode {
 
 struct p_bucket {
   
-  p_bucket(BBox bb)
-    : bb(bb), num_prim(0) {}
+  p_bucket()
+    : bb(BBox()), num_prim(0) {}
   BBox bb;
   size_t num_prim;
 };

@@ -7,6 +7,8 @@
 #include <stack>
 #include <algorithm>
 
+#define DEBUG 0
+
 using namespace std;
 
 namespace CMU462 { namespace StaticScene {
@@ -34,29 +36,168 @@ BVHAccel::BVHAccel(const std::vector<Primitive *> &_primitives,
 
   while(!node_split.empty())
   {
+    printf("\n");
     BVHNode* sn = node_split.top();
+    node_split.pop();
 
     // Sort the range of the primitives of the node by an axis
     // For now, using only the x axis
-    // 
-    bucket = new p_bucket[BUCKET_NUM];
-    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_x);
-    float step = ((primitives.begin() + sn->start + sn->range).x - (primitives.begin() + sn->start).x)/BUCKET_NUM;
-    float init = (primitives.begin() + sn->start).x;
-    Primitive *p = primitives.begin() + sn->start;
-    for(size_t j = 0; j < sn->range; j++)
-      int b = ((p + j).x - init) / step;
-    }
-    //calculate bucket information and store it in an array[bucketsize]
-    //calculate the initial partition, 1:Bucketsize - 1 
-    for(size_t j = 1; j < BUCKET_NUM; j++) {
-      //for each bucket, calculate SAH
-      //union partition into left partition and remove from right
-    }
-    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_y);
-    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_z);
+    struct p_bucket *bucket = new struct p_bucket[BUCKET_NUM];
+    
+    double min_sah = INF_D;
+    BBox partition1;
+    BBox partition2;
+    int axis = 0;
+    int lp; //primitives in left node
+    int rp; //primitives in right node
 
-    node_split.pop();
+    //x-axis
+    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_x);
+
+   // double step = ((primitives[sn->start + sn->range - 1])->get_bbox().max.x -
+     //              (primitives[sn->start])->get_bbox().min.x)/BUCKET_NUM;
+    //double init = (primitives[sn->start])->get_bbox().min.x;
+    double step = sn->bb.extends.x / BUCKET_NUM;
+    double init = sn->bb.min.x;
+    
+    Primitive **p = &(*primitives.begin()) + sn->start;
+
+
+    //calculate bucket information and store it in an array[bucketsize]
+    for(size_t j = 0; j < sn->range; j++) {
+      int b = ((*(p + j))->get_center().x - init) / step;
+      bucket[b].num_prim++;
+      bucket[b].bb.expand((*(p+j))->get_bbox());
+    }
+
+
+    for(int i = 0; i < BUCKET_NUM; i++)
+    {
+      printf("Bucket %d: elements %d\n",i,bucket[i].num_prim);
+    }
+
+    //calculate SAH for each partition
+    for(size_t j = 1; j < BUCKET_NUM; j++) {
+      BBox b1 = BBox();
+      int b1_p = 0;
+      BBox b2 = BBox();
+      int b2_p = 0;
+      for(size_t k = 0; k < j; k++) {
+        b1.expand(bucket[k].bb);
+        b1_p += bucket[k].num_prim;
+      }
+      for(size_t l = j; l < BUCKET_NUM; l++) {
+        b2.expand(bucket[l].bb);
+        b2_p += bucket[l].num_prim;
+      }
+      double sah = b1.surface_area() * b1_p + b2.surface_area() * b2_p;
+      if(sah < min_sah){
+        partition1 = BBox(b1.min, b1.max);
+        partition2 = BBox(b2.min, b2.max);
+        lp = b1_p;
+        rp = b2_p;
+        axis = 0;
+        min_sah = sah;
+      }
+    }
+
+/*
+    //y-axis
+    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_y);
+    step = ((primitives[sn->start + sn->range - 1])->get_center().y -
+            (primitives[sn->start])->get_center().y)/BUCKET_NUM;
+    init = (primitives[sn->start])->get_center().y;
+    //calculate bucket information and store it in an array[bucketsize]
+    for(size_t j = 0; j < sn->range; j++) {
+      int b = ((*(p + j))->get_center().y - init) / step;
+      bucket[b].num_prim++;
+      bucket[b].bb.expand((*(p+j))->get_bbox());
+    }
+
+    //calculate SAH for each partition
+    for(size_t j = 1; j < BUCKET_NUM; j++) {
+      BBox b1 = BBox();
+      int b1_p = 0;
+      BBox b2 = BBox();
+      int b2_p = 0;
+      for(size_t k = 0; k < j; k++) {
+        b1.expand(bucket[k].bb);
+        b1_p += bucket[k].num_prim;
+      }
+      for(size_t l = j; l < BUCKET_NUM; l++) {
+        b2.expand(bucket[l].bb);
+        b2_p += bucket[l].num_prim;
+      }
+      double sah = b1.surface_area() * b1_p + b2.surface_area() * b2_p;
+      if(sah < min_sah){
+        partition1 = BBox(b1.min, b1.max);
+        partition2 = BBox(b2.min, b2.max);
+        lp = b1_p;
+        rp = b2_p;
+        axis = 1;
+      }
+    }
+
+
+    std::cout << "starting\n"; 
+    //z-axis 
+    sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_z);
+    step = ((primitives[sn->start + sn->range - 1])->get_center().z -
+            (primitives[sn->start])->get_center().z)/BUCKET_NUM;
+    init = (primitives[sn->start])->get_center().z;
+    //calculate bucket iinformation and store it in an array[bucketsize]
+    for(size_t j = 0; j < sn->range; j++) {
+      int b = ((*(p + j))->get_center().z - init) / step;
+      bucket[b].num_prim++;
+      bucket[b].bb.expand((*(p+j))->get_bbox());
+    }
+
+    //calculate SAH for each partition
+    for(size_t j = 1; j < BUCKET_NUM; j++) {
+      BBox b1 = BBox();
+      int b1_p = 0;
+      BBox b2 = BBox();
+      int b2_p = 0;
+      for(size_t k = 0; k < j; k++) {
+        b1.expand(bucket[k].bb);
+        b1_p += bucket[k].num_prim;
+      }
+      for(size_t l = j; l < BUCKET_NUM; l++) {
+        b2.expand(bucket[l].bb);
+        b2_p += bucket[l].num_prim;
+      }
+      double sah = b1.surface_area() * b1_p + b2.surface_area() * b2_p;
+      if(sah < min_sah){
+        partition1 = BBox(b1.min, b1.max);
+        partition2 = BBox(b2.min, b2.max);
+        lp = b1_p;
+        rp = b2_p;
+        axis = 2;
+      }
+    } 
+    if(axis == 0) {  
+      sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_x);
+    }
+    else if(axis == 1) {  
+      sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_y);
+    }
+    else {  
+      sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_z);
+    } */
+
+    BVHNode *left = new BVHNode(partition1, sn->start, lp);
+    BVHNode *right = new BVHNode(partition2, sn->start + lp, rp);
+
+    if(lp > 4 && lp != sn->range) {
+      //    std::cout << "lp: " << lp << "\n";
+      node_split.push(left);
+      sn->l = left;
+    }
+    if(rp > 4 && rp != sn->range) {
+      node_split.push(right);
+      sn->r = right;
+      //    std::cout <<"rp: " << rp << "\n";
+    }
   }
 }
 

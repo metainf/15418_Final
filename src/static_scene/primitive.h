@@ -73,7 +73,7 @@ class Primitive {
 
   static bool comp_x(Primitive* i, Primitive* j)
   {
-    return i->get_center().x > j->get_center().x;
+    return i->get_center().x < j->get_center().x;
   }
   
   /**
@@ -82,7 +82,7 @@ class Primitive {
 
   static bool comp_y(Primitive* i, Primitive* j)
   {
-    return i->get_center().y > j->get_center().y;
+    return i->get_center().y < j->get_center().y;
   }
 
   /**
@@ -91,7 +91,7 @@ class Primitive {
 
   static bool comp_z(Primitive* i, Primitive* j)
   {
-    return i->get_center().z > j->get_center().z;
+    return i->get_center().z < j->get_center().z;
   }
 };
 
