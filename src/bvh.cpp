@@ -36,7 +36,6 @@ BVHAccel::BVHAccel(const std::vector<Primitive *> &_primitives,
 
   while(!node_split.empty())
   {
-    printf("\n");
     BVHNode* sn = node_split.top();
     node_split.pop();
 
@@ -57,7 +56,7 @@ BVHAccel::BVHAccel(const std::vector<Primitive *> &_primitives,
    // double step = ((primitives[sn->start + sn->range - 1])->get_bbox().max.x -
      //              (primitives[sn->start])->get_bbox().min.x)/BUCKET_NUM;
     //double init = (primitives[sn->start])->get_bbox().min.x;
-    double step = sn->bb.extends.x / BUCKET_NUM;
+    double step = sn->bb.extent.x / BUCKET_NUM;
     double init = sn->bb.min.x;
     
     Primitive **p = &(*primitives.begin()) + sn->start;
@@ -68,12 +67,6 @@ BVHAccel::BVHAccel(const std::vector<Primitive *> &_primitives,
       int b = ((*(p + j))->get_center().x - init) / step;
       bucket[b].num_prim++;
       bucket[b].bb.expand((*(p+j))->get_bbox());
-    }
-
-
-    for(int i = 0; i < BUCKET_NUM; i++)
-    {
-      printf("Bucket %d: elements %d\n",i,bucket[i].num_prim);
     }
 
     //calculate SAH for each partition
@@ -185,19 +178,20 @@ BVHAccel::BVHAccel(const std::vector<Primitive *> &_primitives,
       sort(primitives.begin() + sn->start, primitives.begin() + sn->start + sn->range, comp_z);
     } */
 
-    BVHNode *left = new BVHNode(partition1, sn->start, lp);
-    BVHNode *right = new BVHNode(partition2, sn->start + lp, rp);
 
-    if(lp > 4 && lp != sn->range) {
+    if(lp > 10 && lp != sn->range) {
       //    std::cout << "lp: " << lp << "\n";
+      BVHNode *left = new BVHNode(partition1, sn->start, lp);
       node_split.push(left);
       sn->l = left;
     }
-    if(rp > 4 && rp != sn->range) {
+    if(rp > 10 && rp != sn->range) {
+      BVHNode *right = new BVHNode(partition2, sn->start + lp, rp);
       node_split.push(right);
       sn->r = right;
       //    std::cout <<"rp: " << rp << "\n";
     }
+    delete[] bucket;
   }
 }
 
