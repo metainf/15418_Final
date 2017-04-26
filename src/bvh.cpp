@@ -29,8 +29,8 @@ namespace CMU462 { namespace StaticScene {
       bb.expand(primitives[i]->get_bbox());
     }
 
-    root = new BVHNode(bb, 0, primitives.size());
-
+    BVHNode* root = new BVHNode(bb, 0, primitives.size());
+    tree.push_back(root);
     stack<BVHNode*> node_split;
     node_split.push(root);
     printf("\n");
@@ -196,14 +196,16 @@ namespace CMU462 { namespace StaticScene {
       if(lp != sn->range) {
         //std::cout << "lp: " << lp << "\n";
         BVHNode *left = new BVHNode(partition1, sn->start, lp);
-        sn->l = left;
+        tree.push_back(left);
+        sn->l = tree.size()-1;
         if(lp > max_leaf_size)
           node_split.push(left);
       }
       if(rp != sn->range) {
         //std::cout <<"rp: " << rp << "\n";
         BVHNode *right = new BVHNode(partition2, sn->start + lp, rp);
-        sn->r = right;
+        tree.push_back(right);
+        sn->r = tree.size()-1;
         if(rp > max_leaf_size)
           node_split.push(right);
       }
@@ -219,7 +221,7 @@ namespace CMU462 { namespace StaticScene {
   }
 
   BBox BVHAccel::get_bbox() const {
-    return root->bb;
+    return tree[0]->bb;
   }
 
   bool BVHAccel::intersect(const Ray &ray) const {

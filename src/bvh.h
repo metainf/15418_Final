@@ -24,15 +24,15 @@ namespace CMU462 { namespace StaticScene {
 struct BVHNode {
 
   BVHNode(BBox bb, size_t start, size_t range)
-      : bb(bb), start(start), range(range), l(NULL), r(NULL) { }
+      : bb(bb), start(start), range(range), l(-1), r(-1) { }
 
-  inline bool isLeaf() const { return l == NULL && r == NULL; }
+  inline bool isLeaf() const { return l == -1 && r == -1; }
 
   BBox bb;        ///< bounding box of the node
   size_t start;   ///< start index into the primitive list
   size_t range;   ///< range of index into the primitive list
-  BVHNode* l;     ///< left child node
-  BVHNode* r;     ///< right child node
+  int l;     ///< left child node
+  int r;     ///< right child node
 };
 
 struct p_bucket {
@@ -115,7 +115,17 @@ class BVHAccel : public Aggregate {
   /**
    * Get entry point (root) - used in visualizer
    */
-  BVHNode* get_root() const { return root; }
+  BVHNode* get_root() const { return tree[0]; }
+
+  /*
+   * Returns the left child of the node
+   */
+  BVHNode* get_l_child(BVHNode* node) {return (node->l < 0) ? NULL:tree[node->l];}
+
+  /*
+   * Returns the left child of the node
+   */
+  BVHNode* get_r_child(BVHNode * node) {return(node->r < 0)? NULL: tree[node->r];}
 
   /**
    * Draw the BVH with OpenGL - used in visualizer
@@ -128,7 +138,7 @@ class BVHAccel : public Aggregate {
   void drawOutline(const Color& c) const { }
 
  private:
-  BVHNode* root; ///< root node of the BVH
+  std::vector<BVHNode*> tree;
 };
 
 } // namespace StaticScene

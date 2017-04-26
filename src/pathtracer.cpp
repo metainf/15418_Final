@@ -279,14 +279,14 @@ void PathTracer::visualize_accel() const {
        bvh->primitives[selected->start + i]->draw(cprim_hl_left);
     }
   } else {
-      if (selected->l) {
-          BVHNode* child = selected->l;
+      if (bvh->get_l_child(selected)) {
+          BVHNode* child = bvh->get_l_child(selected);
           for (size_t i = 0; i < child->range; ++i) {
               bvh->primitives[child->start + i]->draw(cprim_hl_left);
           }
       }
-      if (selected->r) {
-          BVHNode* child = selected->r;
+      if (bvh->get_r_child(selected)) {
+          BVHNode* child = bvh->get_r_child(selected);
           for (size_t i = 0; i < child->range; ++i) {
               bvh->primitives[child->start + i]->draw(cprim_hl_right);
           }
@@ -317,13 +317,13 @@ void PathTracer::visualize_accel() const {
     tstack.pop();
 
     current->bb.draw(cnode);
-    if (current->l) tstack.push(current->l);
-    if (current->r) tstack.push(current->r);
+    if (bvh->get_l_child(current)) tstack.push(bvh->get_l_child(current));
+    if (bvh->get_r_child(current)) tstack.push(bvh->get_r_child(current));
   }
 
   // draw selected node bbox and primitives
-  if (selected->l) selected->l->bb.draw(cnode_hl_child);
-  if (selected->r) selected->r->bb.draw(cnode_hl_child);
+  if (bvh->get_l_child(selected)) bvh->get_l_child(selected)->bb.draw(cnode_hl_child);
+  if (bvh->get_r_child(selected)) bvh->get_r_child(selected)->bb.draw(cnode_hl_child);
 
   glLineWidth(3.f);
   selected->bb.draw(cnode_hl);
@@ -380,13 +380,13 @@ void PathTracer::key_press(int key) {
       }
       break;
   case KEYBOARD_LEFT:
-      if (current->l) {
-          selectionHistory.push(current->l);
+      if (bvh->get_l_child(current)) {
+          selectionHistory.push(bvh->get_l_child(current));
       }
       break;
   case KEYBOARD_RIGHT:
-      if (current->l) {
-          selectionHistory.push(current->r);
+      if (bvh->get_l_child(current)) {
+          selectionHistory.push(bvh->get_r_child(current));
       }
       break;
   case 'a':
