@@ -12,43 +12,43 @@ class Vector3G {
 
     __device__ __global__ Vector3G(double c): x(c), y(c), z(c){}
 
-    __device__ inline bool operator==( const Vector3D& v) const {
+    __device__ inline bool operator==( const Vector3G& v) const {
       return v.x == x && v.y == y && v.z == z;
     }
 
     // negation
-    __device__ inline Vector3D operator-( void ) const {
-      return Vector3D( -x, -y, -z );
+    __device__ inline Vector3G operator-( void ) const {
+      return Vector3G( -x, -y, -z );
     }
 
     // addition
-    __device__ inline Vector3D operator+( const Vector3D& v ) const {
-      return Vector3D( x + v.x, y + v.y, z + v.z );
+    __device__ inline Vector3G operator+( const Vector3G& v ) const {
+      return Vector3G( x + v.x, y + v.y, z + v.z );
     }
 
     // subtraction
-    __device__ inline Vector3D operator-( const Vector3D& v ) const {
-      return Vector3D( x - v.x, y - v.y, z - v.z );
+    __device__ inline Vector3G operator-( const Vector3G& v ) const {
+      return Vector3G( x - v.x, y - v.y, z - v.z );
     }
 
     // right scalar multiplication
-    __device__ inline Vector3D operator*( const double& c ) const {
-      return Vector3D( x * c, y * c, z * c );
+    __device__ inline Vector3G operator*( const double& c ) const {
+      return Vector3G( x * c, y * c, z * c );
     }
 
     // scalar division
-    __device__ inline Vector3D operator/( const double& c ) const {
+    __device__ inline Vector3G operator/( const double& c ) const {
       const double rc = 1.0/c;
-      return Vector3D( rc * x, rc * y, rc * z );
+      return Vector3G( rc * x, rc * y, rc * z );
     }
 
     // addition / assignment
-    __device__ inline void operator+=( const Vector3D& v ) {
+    __device__ inline void operator+=( const Vector3G& v ) {
       x += v.x; y += v.y; z += v.z;
     }
 
     // subtraction / assignment
-    __device__ inline void operator-=( const Vector3D& v ) {
+    __device__ inline void operator-=( const Vector3G& v ) {
       x -= v.x; y -= v.y; z -= v.z;
     }
 
@@ -66,7 +66,7 @@ class Vector3G {
      * Returns Euclidean length.
      */
     __device__ inline double norm( void ) const {
-      return sqrt( x*x + y*y + z*z );
+      return norm3d( x*x, y*y, z*z );
     }
 
     /**
@@ -79,9 +79,9 @@ class Vector3G {
     /**
      * Returns unit vector.
      */
-    __device__ inline Vector3D unit( void ) const {
-      double rNorm = 1. / sqrt( x*x + y*y + z*z );
-      return Vector3D( rNorm*x, rNorm*y, rNorm*z );
+    __device__ inline Vector3G unit( void ) const {
+      double rNorm = 1. / norm3d( x*x, y*y, z*z );
+      return Vector3G( rNorm*x, rNorm*y, rNorm*z );
     }
 
     /**
@@ -94,18 +94,18 @@ class Vector3G {
 }; // class Vector3G
 
 // left scalar multiplication
-__device__ inline Vector3D operator* ( const double& c, const Vector3D& v ) {
-  return Vector3D( c * v.x, c * v.y, c * v.z );
+__device__ inline Vector3G operator* ( const double& c, const Vector3G& v ) {
+  return Vector3G( c * v.x, c * v.y, c * v.z );
 }
 
 // dot product (a.k.a. inner or scalar product)
-__device__ inline double dot( const Vector3D& u, const Vector3D& v ) {
+__device__ inline double dot( const Vector3G& u, const Vector3G& v ) {
   return u.x*v.x + u.y*v.y + u.z*v.z ;
 }
 
 // cross product
-__device__ inline Vector3D cross( const Vector3D& u, const Vector3D& v ) {
-  return Vector3D( u.y*v.z - u.z*v.y,
+__device__ inline Vector3G cross( const Vector3G& u, const Vector3G& v ) {
+  return Vector3G( u.y*v.z - u.z*v.y,
       u.z*v.x - u.x*v.z,
       u.x*v.y - u.y*v.x );
 }
