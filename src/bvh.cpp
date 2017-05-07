@@ -248,11 +248,10 @@ namespace CMU462 { namespace StaticScene {
     // You should store the non-aggregate primitive in the intersection data
     // and not the BVH aggregate itself.
 
-    bool hit = false;
-    for (size_t p = 0; p < primitives.size(); ++p) {
-      if(primitives[p]->intersect(ray, i)) hit = true;
-    }
-
+  bool hit = false;
+  for (size_t p = 0; p < primitives.size(); ++p) {
+    if(primitives[p]->intersect(ray, i)) hit = true;
+  }
     return hit;
 
   }
