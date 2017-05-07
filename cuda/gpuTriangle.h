@@ -5,7 +5,7 @@ class gpuTriangle {
   public:
     Triangle(const GPUMesh* mesh, size_t v1, size_t v2, size_t v3);
 
-    __device__ GPUBBox get_bbox();
+    __device__ gpuBBox get_bbox();
 
     __device__ bool intersect(const GPURay& r);
 
