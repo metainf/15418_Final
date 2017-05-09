@@ -143,6 +143,7 @@ endif(WIN32)
 find_package(OpenGL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(CUDA REQUIRED)
 
 # CMU462
 if(BUILD_LIBCMU462)

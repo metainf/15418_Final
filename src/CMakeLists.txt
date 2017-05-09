@@ -62,11 +62,23 @@ link_directories(
   ${CMU462_LIBRARY_DIRS}
   ${FREETYPE_LIBRARY_DIRS}
 )
+#CUDA
+set(
+  CUDA_NVCC_FLAGS
+  ${CUDA_NVCC_FLAGS};
+  -O3 -gencode arch=compute_61,code=sm_61
+  --std=c++11
+  )
+
+cuda_add_library(cuda_lib
+  cuda/hello.cu
+  cuda/test.cu
+  )
 
 #-------------------------------------------------------------------------------
 # Add executable
 #-------------------------------------------------------------------------------
-add_executable(pathtracer ${APPLICATION_SOURCE})
+cuda_add_executable(pathtracer ${APPLICATION_SOURCE})
 
 target_link_libraries( pathtracer
     CMU462 ${CMU462_LIBRARIES}
@@ -75,6 +87,7 @@ target_link_libraries( pathtracer
     ${OPENGL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${CMAKE_THREADS_INIT}
+    cuda_lib ${CUDA_LIBRARIES}
 )
 
 #-------------------------------------------------------------------------------
