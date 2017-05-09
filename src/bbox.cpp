@@ -5,38 +5,10 @@
 #include <algorithm>
 #include <iostream>
 
+#define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
+#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
+
 namespace CMU462 {
-
-bool planeIntersection(const Ray& r, double& t0, double& t1,
-                       Vector3D e1, Vector3D e2) {
-
-  Vector3D s = r.o - mesh->positions[v1];
-
-  Vector3D e1Xd = cross(e1,r.d);
-  Vector3D sXe2 = cross(s,e2);
-
-  double denom = dot(e1Xd, e2);
-
-  if(denom == 0)
-    return false;
-
-  double u = -dot(sXe2, r.d);
-  double v = dot(e1Xd, s);
-  double t = -dot(sXe2, e1);
-
-  Vector3D sol = 1/denom * Vector3D(u,v,t);
-
-  if(0 <= sol[0] && sol[0] < 1 && 
-     0 <= sol[1] && sol[1] < 1 &&
-     r.min_t <= sol[2] && sol[2] <= r.max_t)
-  {
-    r.max_t = sol[2];
-    return true;
-  }
-
-  return false;
-
-}
 
 bool BBox::intersect(const Ray& r, double& t0, double& t1) const {
 
@@ -45,7 +17,29 @@ bool BBox::intersect(const Ray& r, double& t0, double& t1) const {
   // If the ray intersected the bouding box within the range given by
   // t0, t1, update t0 and t1 with the new intersection times.
 
+  double tx1 = (min.x - r.o.x) / r.d.x;
+  double tx2 = (max.x - r.o.x) / r.d.x;
+  double txmin = MIN(tx1, tx2);
+  double txmax = MAX(tx1, tx2);
+  
+  double ty1 = (min.y - r.o.y) / r.d.y;
+  double ty2 = (max.y - r.o.y) / r.d.y;
+  double tymin = MIN(tx1, tx2);
+  double tymax = MAX(tx1, tx2);
 
+  double tz1 = (min.z - r.o.z) / r.d.z; 
+  double tz2 = (min.z - r.o.z) / r.d.z;
+  double tzmin = MIN(tx1, tx2);
+  double tzmax = MAX(tx1, tx2);
+
+  double tmin = MAX(MAX(t0, txmin), MAX(tymin, tzmin));
+  double tmax = MIN(MIN(t1, txmax), MIN(tymax, tzmax));
+
+  if(tmin <= tmax && tmax >= 0) {
+    t1 = tmax;
+    t0 = MIN(t0, tmin);
+    return true;
+  }
 
   return false;
   

@@ -15,8 +15,8 @@ namespace CMU462 { namespace StaticScene {
 
   BVHAccel::BVHAccel(const std::vector<Primitive *> &_primitives,
       size_t max_leaf_size) {
-
     this->primitives = _primitives;
+    tree = new std::vector<BVHNode*>();
 
     // TODO:
     // Construct a BVH from the given vector of primitives and maximum leaf
@@ -28,12 +28,10 @@ namespace CMU462 { namespace StaticScene {
     for (size_t i = 0; i < primitives.size(); ++i) {
       bb.expand(primitives[i]->get_bbox());
     }
-
     BVHNode* root = new BVHNode(bb, 0, primitives.size());
-    tree.push_back(root);
+    tree->push_back(root);
     stack<BVHNode*> node_split;
     node_split.push(root);
-    printf("\n");
     while(!node_split.empty())
     {
       BVHNode* sn = node_split.top();
@@ -196,16 +194,16 @@ namespace CMU462 { namespace StaticScene {
       if(lp != sn->range) {
         //std::cout << "lp: " << lp << "\n";
         BVHNode *left = new BVHNode(partition1, sn->start, lp);
-        tree.push_back(left);
-        sn->l = tree.size()-1;
+        tree->push_back(left);
+        sn->l = tree->size()-1;
         if(lp > max_leaf_size)
           node_split.push(left);
       }
       if(rp != sn->range) {
         //std::cout <<"rp: " << rp << "\n";
         BVHNode *right = new BVHNode(partition2, sn->start + lp, rp);
-        tree.push_back(right);
-        sn->r = tree.size()-1;
+        tree->push_back(right);
+        sn->r = tree->size()-1;
         if(rp > max_leaf_size)
           node_split.push(right);
       }
@@ -217,11 +215,10 @@ namespace CMU462 { namespace StaticScene {
 
     // TODO:
     // Implement a proper destructor for your BVH accelerator aggregate
-
   }
 
   BBox BVHAccel::get_bbox() const {
-    return tree[0]->bb;
+    return (*tree)[0]->bb;
   }
 
   bool BVHAccel::intersect(const Ray &ray) const {
@@ -231,10 +228,36 @@ namespace CMU462 { namespace StaticScene {
     // with a BVH aggregate if and only if it intersects a primitive in
     // the BVH that is not an aggregate.
     bool hit = false;
-    for (size_t p = 0; p < primitives.size(); ++p) {
-      if(primitives[p]->intersect(ray)) hit = true;
+    //create a stack
+    stack<BVHNode*> nodes;
+    nodes.push(get_root());
+    while(!nodes.empty()) {
+      BVHNode *n = nodes.top();
+      nodes.pop();
+      //if leaf
+      BVHNode *left = get_l_child(n);
+      BVHNode *right = get_r_child(n);
+      if(n->isLeaf()) {
+        //check if primitives intersect
+        for(size_t p = 0; p < n->range; p++) {
+          if(primitives[p + n->start]->intersect(ray)) {
+            hit = true;
+          }
+        }
+      }
+      else if(right != NULL) {
+      //check if right node bounding box intersects, add to stack
+        if(right->bb.intersect(ray, ray.min_t, ray.max_t)) {
+          nodes.push(right);
+        }
+      }
+      else if(left != NULL) {
+      //check if left node intersetcs, add to stack
+        if(left->bb.intersect(ray, ray.min_t, ray.max_t)) {
+          nodes.push(left);
+        }
+      }
     }
-
     return hit;
 
   }

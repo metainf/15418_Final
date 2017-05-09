@@ -115,17 +115,18 @@ class BVHAccel : public Aggregate {
   /**
    * Get entry point (root) - used in visualizer
    */
-  BVHNode* get_root() const { return tree[0]; }
+  BVHNode* get_root() const { return (*tree)[0]; }
+
 
   /*
    * Returns the left child of the node
    */
-  BVHNode* get_l_child(BVHNode* node) {return (node->l < 0) ? NULL:tree[node->l];}
+  BVHNode* get_l_child(BVHNode* node) const {return (node->l < 0) ? NULL:(*tree)[node->l];}
 
   /*
    * Returns the left child of the node
    */
-  BVHNode* get_r_child(BVHNode * node) {return(node->r < 0)? NULL: tree[node->r];}
+  BVHNode* get_r_child(BVHNode * node) const {return(node->r < 0)? NULL: (*tree)[node->r];}
 
   /**
    * Draw the BVH with OpenGL - used in visualizer
@@ -138,7 +139,7 @@ class BVHAccel : public Aggregate {
   void drawOutline(const Color& c) const { }
 
  private:
-  std::vector<BVHNode*> tree;
+  std::vector<BVHNode*> *tree;
 };
 
 } // namespace StaticScene
