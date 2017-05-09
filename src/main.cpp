@@ -27,6 +27,8 @@ void usage(const char* binaryName) {
   printf("\n");
 }
 
+int main_test();
+
 HDRImageBuffer* load_exr(const char* file_path) {
   
   const char* err;
@@ -99,6 +101,7 @@ int main( int argc, char** argv ) {
     return 1;
   }
 
+  main_test();
   string sceneFilePath = argv[optind];
   msg("Input scene file: " << sceneFilePath);
 
