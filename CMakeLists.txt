@@ -157,6 +157,7 @@ endif(BUILD_LIBCMU462)
 #-------------------------------------------------------------------------------
 # Add subdirectories
 #-------------------------------------------------------------------------------
+add_subdirectory(cuda)
 add_subdirectory(src)
 
 # build documentation

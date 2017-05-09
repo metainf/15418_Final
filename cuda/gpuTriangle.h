@@ -3,7 +3,7 @@
 
 class gpuTriangle {
   public:
-    Triangle(const GPUMesh* mesh, size_t v1, size_t v2, size_t v3);
+    __global__ gpuTriangle(const GPUMesh* mesh, size_t v1, size_t v2, size_t v3);
 
     __device__ gpuBBox get_bbox();
 
