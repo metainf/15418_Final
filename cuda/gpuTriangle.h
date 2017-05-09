@@ -3,21 +3,21 @@
 
 class gpuTriangle {
   public:
-    __global__ gpuTriangle(const GPUMesh* mesh, size_t v1, size_t v2, size_t v3);
+    __host__ gpuTriangle(const gpuMesh* mesh, size_t v1, size_t v2, size_t v3);
 
     __device__ gpuBBox get_bbox();
 
-    __device__ bool intersect(const GPURay& r);
+    __device__ bool intersect(const gpuRay& r);
 
-    __device__ Vector3G get_center();
+    __device__ gpuVector3D get_center();
   private:
 
-    const GPUMesh* mesh;
+    const gpuMesh* mesh;
     size_t v1;
     size_t v2;
     size_t v3;
 
-    Vector3G centorid;
+    gpuVector3D centorid;
 };
 
 #endif
