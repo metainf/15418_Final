@@ -101,7 +101,7 @@ int main( int argc, char** argv ) {
     return 1;
   }
 
-  main_test();
+//  main_test();
   string sceneFilePath = argv[optind];
   msg("Input scene file: " << sceneFilePath);
 
