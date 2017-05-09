@@ -38,7 +38,7 @@ size_t Viewer::buffer_h;
 Renderer* Viewer::renderer; 
 
 // on-screen display
-OSDText* Viewer::osd_text;
+//OSDText* Viewer::osd_text;
 int Viewer::line_id_renderer;
 int Viewer::line_id_framerate;
 
@@ -53,7 +53,7 @@ Viewer::~Viewer() {
   
   // free resources
   delete renderer;
-  delete osd_text;
+//  delete osd_text;
 }
 
 
@@ -115,9 +115,8 @@ void Viewer::init() {
     if (HDPI) renderer->use_hdpi_reneder_target();
     renderer->init();
   } 
-
   // initialize status OSD
-  osd_text = new OSDText();
+  /*osd_text = new OSDText();
   if (osd_text->init(HDPI) < 0) {
     out_err("Error: could not initialize on-screen display!");
     exit( 1 );
@@ -128,7 +127,7 @@ void Viewer::init() {
                                           18, Color(0.15, 0.5, 0.15));
   line_id_framerate = osd_text->add_line(-0.98, -0.96, "Framerate", 
                                           14, Color(0.15, 0.5, 0.15));
-
+*/
   // resize elements to current size
   resize_callback(window, buffer_w, buffer_h);
 
@@ -180,11 +179,12 @@ void Viewer::drawInfo() {
   if (elapsed >= 1.0f) {
 
     // update framecount OSD
+    /*
     Color c = framecount < 20 ? Color(1.0, 0.35, 0.35) : Color(0.15, 0.5, 0.15);
     osd_text->set_color(line_id_framerate, c);
     string framerate_info = "Framerate: " + to_string(framecount) + " fps";
     osd_text->set_text(line_id_framerate, framerate_info);
-
+*/
     // reset timer and counter
     framecount = 0;
     sys_last = sys_curr; 
@@ -199,7 +199,8 @@ void Viewer::drawInfo() {
   // udpate renderer OSD
   // TODO: This is done on every update and it shouldn't be!
   // The viewer should only update when the renderer needs to
-  // update the info text. 
+  // update the info text.
+  /*
   if (renderer) {
     string renderer_info = renderer->info();
     osd_text->set_text(line_id_renderer, renderer_info);
@@ -209,7 +210,7 @@ void Viewer::drawInfo() {
   }
 
   // render OSD
-  osd_text->render();
+  osd_text->render();*/
 
 }
 
@@ -228,7 +229,7 @@ void Viewer::resize_callback( GLFWwindow* window, int width, int height ) {
   glViewport( 0, 0, buffer_w, buffer_h );
 
   // resize on-screen display
-  osd_text->resize(buffer_w, buffer_h);
+  //osd_text->resize(buffer_w, buffer_h);
 
   // resize render if there is a user space renderer
   if (renderer) renderer->resize( buffer_w, buffer_h );  

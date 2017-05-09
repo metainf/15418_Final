@@ -41,7 +41,7 @@ Application::~Application() {
 
 void Application::init() {
 
-  textManager.init(use_hdpi);
+  //textManager.init(use_hdpi);
   text_color = Color(1.0, 1.0, 1.0);
 
   // Setup all the basic internal state to default values,
@@ -172,7 +172,7 @@ void Application::resize(size_t w, size_t h) {
   screenW = w;
   screenH = h;
   camera.set_screen_size(w, h);
-  textManager.resize(w, h);
+  //textManager.resize(w, h);
   set_projection_matrix();
   if (mode != EDIT_MODE) {
     pathtracer->set_frame_size(w, h);
@@ -595,10 +595,13 @@ Matrix4x4 Application::get_world_to_3DH() {
 
 inline void Application::draw_string(float x, float y,
   string str, size_t size, const Color& c) {
+  /*
   int line_index = textManager.add_line(( x * 2 / screenW) - 1.0,
                                         (-y * 2 / screenH) + 1.0,
                                         str, size, c);
+  
   messages.push_back(line_index);
+  */
 }
 
 void Application::draw_coordinates() {
@@ -636,7 +639,7 @@ void Application::draw_coordinates() {
 }
 
 void Application::draw_hud() {
-  textManager.clear();
+  //textManager.clear();
   messages.clear();
 
   const size_t size = 16;
@@ -714,7 +717,7 @@ void Application::draw_hud() {
   glEnable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
 
-  textManager.render();
+  //textManager.render();
 }
 
 } // namespace CMU462

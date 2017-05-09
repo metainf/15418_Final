@@ -99,7 +99,7 @@ class Viewer {
   static Renderer* renderer;
 
   // on-screen display
-  static OSDText* osd_text;
+  //static OSDText* osd_text;
   static int line_id_renderer;
   static int line_id_framerate;
 

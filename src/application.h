@@ -180,7 +180,7 @@ class Application : public Renderer {
   void mouse_moved(float x, float y);     // Mouse Moved.
 
   // OSD text manager //
-  OSDText textManager;
+  //OSDText textManager;
   Color text_color;
   vector<int> messages;
 
