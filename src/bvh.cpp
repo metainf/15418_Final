@@ -325,13 +325,21 @@ namespace CMU462 { namespace StaticScene {
           double t1 = ray.max_t;
           double t2 = ray.min_t;
           double t3 = ray.max_t;
-          left->bb.intersect(ray, t0, t1);
-          right->bb.intersect(ray, t2, t3);
+          bool leftHit = left->bb.intersect(ray, t0, t1);
+          bool rightHit = right->bb.intersect(ray, t2, t3);
           
-          BVHNode *first = (t0 <= t2) ? left : right;
-          BVHNode *second = (t0 <= t2) ? right : left;
-          nodes.push(first);
-          nodes.push(second);
+          if(leftHit && rightHit) {
+            BVHNode *first = (t0 <= t2) ? left : right;
+            BVHNode *second = (t0 <= t2) ? right : left;
+            nodes.push(first);
+            nodes.push(second);
+          }
+          else if (leftHit) {
+            nodes.push(left);
+          }
+          else if (rightHit) {
+            nodes.push(right);
+          }
         }
       }
     }
