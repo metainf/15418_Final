@@ -33,6 +33,7 @@ class Mesh : public SceneObject {
    */
   BSDF* get_bsdf() const;
 
+  size_t numVerts;      ///< number of elements in the position array
   Vector3D *positions;  ///< position array
   Vector3D *normals;    ///< normal array
 

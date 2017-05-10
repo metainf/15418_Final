@@ -26,6 +26,7 @@ Mesh::Mesh(const HalfedgeMesh& mesh, BSDF* bsdf) {
     vertexI++;
   }
 
+  numVerts = vertexI;
   positions = new Vector3D[vertexI];
   normals   = new Vector3D[vertexI];
   for (int i = 0; i < vertexI; i++) {
