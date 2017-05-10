@@ -1,5 +1,5 @@
-#ifndef VECTOR3G_H
-#define VECTOR3G_H
+#ifndef GPU_VECTOR3D_H
+#define GPU_VECTOR3D_H
 
 class gpuVector3D {
   public:
