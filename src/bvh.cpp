@@ -59,43 +59,43 @@ namespace CMU462 { namespace StaticScene {
 
       Primitive **p = &(*primitives.begin()) + sn->start;
 
-
-      //calculate bucket information and store it in an array[bucketsize]
-      for(size_t j = 0; j < sn->range; j++) {
-        int b = ((*(p + j))->get_center().x - init) / step;
-        bucket[b].num_prim++;
-        bucket[b].bb.expand((*(p+j))->get_bbox());
+      if(step > 0){
+        //calculate bucket information and store it in an array[bucketsize]
+        for(size_t j = 0; j < sn->range; j++) {
+          int b = ((*(p + j))->get_center().x - init) / step;
+          bucket[b].num_prim++;
+          bucket[b].bb.expand((*(p+j))->get_bbox());
+        }
+        /*
+           printf("total num :%d\n",sn->range);
+           for(int i = 0; i < BUCKET_NUM; i++)
+           printf("Bucket %d: num: %d\n",i,bucket[i].num_prim);
+           */
+        //calculate SAH for each partition
+        for(size_t j = 1; j < BUCKET_NUM; j++) {
+          BBox b1 = BBox();
+          int b1_p = 0;
+          BBox b2 = BBox();
+          int b2_p = 0;
+          for(size_t k = 0; k < j; k++) {
+            b1.expand(bucket[k].bb);
+            b1_p += bucket[k].num_prim;
+          }
+          for(size_t l = j; l < BUCKET_NUM; l++) {
+            b2.expand(bucket[l].bb);
+            b2_p += bucket[l].num_prim;
+          }
+          double sah = b1.surface_area() * b1_p + b2.surface_area() * b2_p;
+          if(sah < min_sah){
+            partition1 = BBox(b1.min, b1.max);
+            partition2 = BBox(b2.min, b2.max);
+            lp = b1_p;
+            rp = b2_p;
+            axis = 0;
+            min_sah = sah;
+          }
+        }
       }
-      /*
-         printf("total num :%d\n",sn->range);
-         for(int i = 0; i < BUCKET_NUM; i++)
-         printf("Bucket %d: num: %d\n",i,bucket[i].num_prim);
-         */
-      //calculate SAH for each partition
-      for(size_t j = 1; j < BUCKET_NUM; j++) {
-        BBox b1 = BBox();
-        int b1_p = 0;
-        BBox b2 = BBox();
-        int b2_p = 0;
-        for(size_t k = 0; k < j; k++) {
-          b1.expand(bucket[k].bb);
-          b1_p += bucket[k].num_prim;
-        }
-        for(size_t l = j; l < BUCKET_NUM; l++) {
-          b2.expand(bucket[l].bb);
-          b2_p += bucket[l].num_prim;
-        }
-        double sah = b1.surface_area() * b1_p + b2.surface_area() * b2_p;
-        if(sah < min_sah){
-          partition1 = BBox(b1.min, b1.max);
-          partition2 = BBox(b2.min, b2.max);
-          lp = b1_p;
-          rp = b2_p;
-          axis = 0;
-          min_sah = sah;
-        }
-      }
-
       // Reset the buckets
       for(int i = 0; i < BUCKET_NUM; i++)
       {
@@ -106,38 +106,39 @@ namespace CMU462 { namespace StaticScene {
       //y-axis
       step = sn->bb.extent.y / BUCKET_NUM;
       init = sn->bb.min.y;
-      //calculate bucket information and store it in an array[bucketsize]
-      for(size_t j = 0; j < sn->range; j++) {
-        int b = ((*(p + j))->get_center().y - init) / step;
-        bucket[b].num_prim++;
-        bucket[b].bb.expand((*(p+j))->get_bbox());
-      }
+      if(step > 0){
+        //calculate bucket information and store it in an array[bucketsize]
+        for(size_t j = 0; j < sn->range; j++) {
+          int b = ((*(p + j))->get_center().y - init) / step;
+          bucket[b].num_prim++;
+          bucket[b].bb.expand((*(p+j))->get_bbox());
+        }
 
-      //calculate SAH for each partition
-      for(size_t j = 1; j < BUCKET_NUM; j++) {
-        BBox b1 = BBox();
-        int b1_p = 0;
-        BBox b2 = BBox();
-        int b2_p = 0;
-        for(size_t k = 0; k < j; k++) {
-          b1.expand(bucket[k].bb);
-          b1_p += bucket[k].num_prim;
-        }
-        for(size_t l = j; l < BUCKET_NUM; l++) {
-          b2.expand(bucket[l].bb);
-          b2_p += bucket[l].num_prim;
-        }
-        double sah = b1.surface_area() * b1_p + b2.surface_area() * b2_p;
-        if(sah < min_sah){
-          partition1 = BBox(b1.min, b1.max);
-          partition2 = BBox(b2.min, b2.max);
-          lp = b1_p;
-          rp = b2_p;
-          axis = 1;
-          min_sah = sah;
+        //calculate SAH for each partition
+        for(size_t j = 1; j < BUCKET_NUM; j++) {
+          BBox b1 = BBox();
+          int b1_p = 0;
+          BBox b2 = BBox();
+          int b2_p = 0;
+          for(size_t k = 0; k < j; k++) {
+            b1.expand(bucket[k].bb);
+            b1_p += bucket[k].num_prim;
+          }
+          for(size_t l = j; l < BUCKET_NUM; l++) {
+            b2.expand(bucket[l].bb);
+            b2_p += bucket[l].num_prim;
+          }
+          double sah = b1.surface_area() * b1_p + b2.surface_area() * b2_p;
+          if(sah < min_sah){
+            partition1 = BBox(b1.min, b1.max);
+            partition2 = BBox(b2.min, b2.max);
+            lp = b1_p;
+            rp = b2_p;
+            axis = 1;
+            min_sah = sah;
+          }
         }
       }
-
 
       // Reset the buckets
       for(int i = 0; i < BUCKET_NUM; i++)
@@ -193,7 +194,7 @@ namespace CMU462 { namespace StaticScene {
       }
 
 
-      if(lp != sn->range) {
+      if(lp != sn->range && lp > 0) {
         //std::cout << "lp: " << lp << "\n";
         BVHNode *left = new BVHNode(partition1, sn->start, lp);
         tree->push_back(left);
@@ -202,7 +203,7 @@ namespace CMU462 { namespace StaticScene {
           node_split.push(left);
         }
       }
-      if(rp != sn->range) {
+      if(rp != sn->range && rp > 0) {
         //std::cout <<"rp: " << rp << "\n";
         BVHNode *right = new BVHNode(partition2, sn->start + lp, rp);
         tree->push_back(right);
@@ -251,13 +252,13 @@ namespace CMU462 { namespace StaticScene {
         }
       }
       else if(right != NULL) {
-      //check if right node bounding box intersects, add to stack
+        //check if right node bounding box intersects, add to stack
         if(right->bb.intersect(ray, ray.min_t, ray.max_t)) {
           nodes.push(right);
         }
       }
       else if(left != NULL) {
-      //check if left node intersetcs, add to stack
+        //check if left node intersetcs, add to stack
         if(left->bb.intersect(ray, ray.min_t, ray.max_t)) {
           nodes.push(left);
         }
@@ -278,12 +279,12 @@ namespace CMU462 { namespace StaticScene {
 
     /* naive implementation 
      *
-    bool hit = false;
-    for (size_t p = 0; p < primitives.size(); ++p) {
-      if(primitives[p]->intersect(ray, i)) hit = true;
-    }
-    return hit;
-    */
+     bool hit = false;
+     for (size_t p = 0; p < primitives.size(); ++p) {
+     if(primitives[p]->intersect(ray, i)) hit = true;
+     }
+     return hit;
+     */
 
     bool hit = false;
     //create a stack
@@ -304,7 +305,7 @@ namespace CMU462 { namespace StaticScene {
         }
       }
       else if(right != NULL) {
-      //check if right node bounding box intersects, add to stack
+        //check if right node bounding box intersects, add to stack
         double t0 = ray.min_t;
         double t1 = ray.max_t;
         if(right->bb.intersect(ray, t0, t1)) {
@@ -312,7 +313,7 @@ namespace CMU462 { namespace StaticScene {
         }
       }
       else if(left != NULL) {
-      //check if left node intersetcs, add to stack
+        //check if left node intersetcs, add to stack
         double t0 = ray.min_t;
         double t1 = ray.max_t;
         if(left->bb.intersect(ray, t0, t1)) {
