@@ -304,20 +304,22 @@ namespace CMU462 { namespace StaticScene {
           }
         }
       }
-      else if(right != NULL) {
-        //check if right node bounding box intersects, add to stack
-        double t0 = ray.min_t;
-        double t1 = ray.max_t;
-        if(right->bb.intersect(ray, t0, t1)) {
-          nodes.push(right);
+      else {
+        if(right != NULL) {
+          //check if right node bounding box intersects, add to stack
+          double t0 = ray.min_t;
+          double t1 = ray.max_t;
+          if(right->bb.intersect(ray, t0, t1)) {
+            nodes.push(right);
+          }
         }
-      }
-      else if(left != NULL) {
-        //check if left node intersetcs, add to stack
-        double t0 = ray.min_t;
-        double t1 = ray.max_t;
-        if(left->bb.intersect(ray, t0, t1)) {
-          nodes.push(left);
+        if(left != NULL) {
+          //check if left node intersetcs, add to stack
+          double t0 = ray.min_t;
+          double t1 = ray.max_t;
+          if(left->bb.intersect(ray, t0, t1)) {
+            nodes.push(left);
+          }
         }
       }
     }
