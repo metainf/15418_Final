@@ -1,6 +1,6 @@
 #include "gpuTriangle.h"
 
-__global__
+__host__
 gpuTriangle::gpuTriangle(const gpuMesh* mesh, size_t v1, size_t v2, size_t v3):
   mesh(mesh), v1(v1), v2(v2), v3(v3){
     gpuVector3D p1 = mesh->positions[v1];
@@ -10,6 +10,7 @@ gpuTriangle::gpuTriangle(const gpuMesh* mesh, size_t v1, size_t v2, size_t v3):
     centroid = (p1 + p2 + p3)/3;
   }
 
+__device__
 gpuBBox gpuTriangle::get_bbox() const {
 
   // TODO: 
@@ -28,6 +29,7 @@ gpuBBox gpuTriangle::get_bbox() const {
   return gpuBBox(min,max);
 }
 
+__device__
 bool gpuTriangle::intersect(const gpuRay& r) const {
 
   // TODO: implement ray-triangle intersection
@@ -60,6 +62,7 @@ bool gpuTriangle::intersect(const gpuRay& r) const {
   return false;
 }
 
+__device__
 gpuVector3D gpuTriangle::get_center(){
   return centroid;
 }

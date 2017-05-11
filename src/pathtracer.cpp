@@ -237,6 +237,7 @@ void PathTracer::build_accel() {
   fprintf(stdout, "[PathTracer] Building BVH... "); fflush(stdout);
   timer.start();
   bvh = new BVHAccel(primitives);
+  sizeof(bvh ->primitives);
   timer.stop();
   fprintf(stdout, "Done! (%.4f sec)\n", timer.duration());
 

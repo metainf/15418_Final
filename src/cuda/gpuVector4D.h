@@ -1,7 +1,7 @@
 #ifndef GPU_VECTOR4D_H
 #define GPU_VECTOR4D_H
 
-#include "vector3D.h"
+#include "gpuVector3D.h"
 
 /**
  * Defines 4D standard vectors.
@@ -193,8 +193,5 @@ inline double dot( const gpuVector4D& u, const gpuVector4D& v ) {
   return u.x*v.x + u.y*v.y + u.z*v.z + u.w*v.w;;
 }
 
-// prints components
-__device__
-std::ostream& operator<<( std::ostream& os, const gpuVector4D& v );
 
 #endif // CMU462_VECTOR4D_H

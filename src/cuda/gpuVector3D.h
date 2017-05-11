@@ -33,12 +33,12 @@ class gpuVector3D {
     }
 
     // addition
-    __device__ inline gpuVector3D operator+( const gpuVector3D& v ) const {
+    __device__ __host__ inline gpuVector3D operator+( const gpuVector3D& v ) const {
       return gpuVector3D( x + v.x, y + v.y, z + v.z );
     }
 
     // subtraction
-    __device__ inline gpuVector3D operator-( const gpuVector3D& v ) const {
+    __device__ __host__ inline gpuVector3D operator-( const gpuVector3D& v ) const {
       return gpuVector3D( x - v.x, y - v.y, z - v.z );
     }
 
@@ -48,7 +48,7 @@ class gpuVector3D {
     }
 
     // scalar division
-    __device__ inline gpuVector3D operator/( const double& c ) const {
+    __device__ __host__ inline gpuVector3D operator/( const double& c ) const {
       const double rc = 1.0/c;
       return gpuVector3D( rc * x, rc * y, rc * z );
     }

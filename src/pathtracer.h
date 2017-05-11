@@ -144,6 +144,7 @@ class PathTracer {
    */
   void save_image();
 
+  BVHAccel* bvh;                 ///< BVH accelerator aggregate
  private:
 
   /**
@@ -223,7 +224,6 @@ class PathTracer {
 
   // Components //
 
-  BVHAccel* bvh;                 ///< BVH accelerator aggregate
   EnvironmentLight *envLight;    ///< environment map
   Sampler2D* gridSampler;        ///< samples unit grid
   Sampler3D* hemisphereSampler;  ///< samples unit hemisphere

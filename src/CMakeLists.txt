@@ -76,7 +76,14 @@ set(
 cuda_add_library(cuda_lib
   cuda/hello.cu
   cuda/test.cu
+  cuda/gpuTriangle.cu
+  cuda/gpuPathtracer.cu
+  cuda/gpuMatrix4x4.cu
   )
+
+target_link_libraries( cuda_lib
+    CMU462 ${CMU462_LIBRARIES}
+)
 
 #-------------------------------------------------------------------------------
 # Add executable

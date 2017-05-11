@@ -1,6 +1,6 @@
-#include "vector3G"
-#include "gpuRay"
-
+#include "gpuVector3D.h"
+#include "gpuRay.h"
+#include "math_constants.h"
 
 struct gpuBBox {
 
@@ -14,8 +14,8 @@ struct gpuBBox {
    * points.
    */
   __device__ __host__ gpuBBox() {
-    max = gpuVector3D(-INF_D, -INF_D, -INF_D);
-    min = gpuVector3D( INF_D,  INF_D,  INF_D);
+    max = gpuVector3D(0, 0, 0);
+    min = gpuVector3D( 0,  0, 0);
     extent = max - min;
   }
 

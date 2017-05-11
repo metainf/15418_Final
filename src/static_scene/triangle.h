@@ -76,13 +76,12 @@ namespace CMU462 { namespace StaticScene {
    */
   Vector3D get_center();
 
- private:
-
   const Mesh* mesh;   ///< pointer to the mesh the triangle is a part of
-
+  
   size_t v1; ///< index into the mesh attribute arrays
   size_t v2; ///< index into the mesh attribute arrays
   size_t v3; ///< index into the mesh attribute arrays
+ private:
 
   Vector3D centroid;
 

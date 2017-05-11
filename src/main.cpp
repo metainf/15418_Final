@@ -6,6 +6,7 @@
 
 #include "application.h"
 #include "image.h"
+#include "cuda/test.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -27,7 +28,7 @@ void usage(const char* binaryName) {
   printf("\n");
 }
 
-int main_test();
+//int main_test();
 
 HDRImageBuffer* load_exr(const char* file_path) {
   
