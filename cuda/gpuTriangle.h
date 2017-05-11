@@ -1,6 +1,11 @@
 #ifndef GPU_TRIANGLE_H
 #define GPU_TRIANGLE_H
 
+#include "gpuBBox.h"
+#include "gpuVector3D"
+#include "gpuRay.h"
+#include "gpuMesh.h"
+
 class gpuTriangle {
   public:
     __host__ gpuTriangle(const gpuMesh* mesh, size_t v1, size_t v2, size_t v3);

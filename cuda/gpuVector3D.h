@@ -1,5 +1,5 @@
-#ifndef VECTOR3G_H
-#define VECTOR3G_H
+#ifndef GPU_VECTOR3D_H
+#define GPU_VECTOR3D_H
 
 class gpuVector3D {
   public:
@@ -12,6 +12,15 @@ class gpuVector3D {
 
     __device__ __host__ gpuVector3D(double c): x(c), y(c), z(c){}
 
+    // returns reference to the specified component (0-based indexing: x, y, z)
+    __device__ __host__ inline double& operator[] ( const int& index ) {
+      return ( &x )[ index ];
+    }
+
+    // returns const reference to the specified component (0-based indexing: x, y, z)
+    __device__ __host__ inline const double& operator[] ( const int& index ) const {
+      return ( &x )[ index ];
+    }
     __device__ inline bool operator==( const gpuVector3D& v) const {
       return v.x == x && v.y == y && v.z == z;
     }
@@ -109,3 +118,4 @@ __device__ inline gpuVector3D cross( const gpuVector3D& u, const gpuVector3D& v 
       u.z*v.x - u.x*v.z,
       u.x*v.y - u.y*v.x );
 }
+#endif
