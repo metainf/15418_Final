@@ -4,15 +4,18 @@
 #include "gpuRay.h"
 #include "gpuMesh.h"
 #include "gpuTriangle.h"
+#include "gpuCamera.h"
 
 using namespace CMU462;
 using namespace StaticScene;
 
 gpuMesh* mesh;
 gpuTriangle* primitives;
+gpuCamera* camera;
 
 __device__ bool trace_ray(const gpuRay& ray)
 {
+  //bvh->intersect(r);
 }
 
 __device__ bool raytrace_pixel(size_t x, size_t y)
@@ -74,8 +77,13 @@ void gpuPathTracer::load_scene()
   printf("[GPU Pathtracer]: finished loading scene\n");
 }
 
-void gpuPathTracer::load_camera()
+void gpuPathTracer::load_camera(Camera *cam)
 {
+  gpuCamera temp = gpuCamera(cam->c2w, cam->position(), cam->screenW, cam->screenH, cam->screenDist);
+  //free the device camera
+  cudaFree(camera);
+  cudaMalloc((void**)&camera,sizeof(gpuCamera));
+  cudaMemcpy(camera,&temp,sizeof(gpuCamera),cudaMemcpyHostToDevice);
 }
 
 void gpuPathTracer::set_frame_size(size_t width, size_t height)

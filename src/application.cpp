@@ -597,7 +597,7 @@ void Application::set_up_pathtracer() {
 
 void Application::set_up_gpuPathtracer() {
   if (mode != EDIT_MODE) return;
-  gpuPathtracer->load_camera();
+  gpuPathtracer->load_camera(&camera);
   gpuPathtracer->load_scene();
   gpuPathtracer->set_frame_size(screenW, screenH);
 

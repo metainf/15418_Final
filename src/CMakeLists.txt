@@ -79,6 +79,8 @@ cuda_add_library(cuda_lib
   cuda/gpuTriangle.cu
   cuda/gpuPathtracer.cu
   cuda/gpuMatrix4x4.cu
+  cuda/gpuMatrix3x3.cu
+  cuda/gpuCamera.cu
   )
 
 target_link_libraries( cuda_lib

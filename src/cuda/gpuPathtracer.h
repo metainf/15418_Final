@@ -19,7 +19,7 @@ class gpuPathTracer{
     /*
      * Loads a camera from the CPU to the GPU
      */
-    void load_camera();
+    void load_camera(Camera *cam);
 
     /*
      * sets the frame size
@@ -45,7 +45,6 @@ class gpuPathTracer{
 
     // Components //
     PathTracer * pathtracer;
-    //gpuCamera* camera;
     bool* imagePixels;
     size_t w;
     size_t h;
