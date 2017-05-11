@@ -1,13 +1,15 @@
 #include "gpuTriangle.h"
 
 __host__
-gpuTriangle::gpuTriangle(const gpuMesh* mesh, size_t v1, size_t v2, size_t v3):
+gpuTriangle::gpuTriangle(const Mesh* mesh_cpu, const gpuMesh* mesh,
+    size_t v1, size_t v2, size_t v3):
   mesh(mesh), v1(v1), v2(v2), v3(v3){
-    gpuVector3D p1 = mesh->positions[v1];
-    gpuVector3D p2 = mesh->positions[v2];
-    gpuVector3D p3 = mesh->positions[v3];
+    Vector3D p1 = mesh_cpu->positions[v1];
+    Vector3D p2 = mesh_cpu->positions[v2];
+    Vector3D p3 = mesh_cpu->positions[v3];
 
-    centroid = (p1 + p2 + p3)/3;
+    Vector3D c = (p1 + p2 + p3)/3;
+    centroid = gpuVector3D(c.x,c.y,c.z);
   }
 
 __device__

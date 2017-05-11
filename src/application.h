@@ -30,6 +30,7 @@
 #include "static_scene/scene.h"
 #include "pathtracer.h"
 #include "image.h"
+#include "cuda/gpuPathtracer.h"
 
 // Shared modules
 #include "camera.h"
@@ -92,15 +93,18 @@ class Application : public Renderer {
   enum Mode {
     EDIT_MODE,
     RENDER_MODE,
-    VISUALIZE_MODE
+    VISUALIZE_MODE,
+    GPU_RENDER_MODE
   };
   Mode mode;
 
   void to_edit_mode();
   void set_up_pathtracer();
+  void set_up_gpuPathtracer();
 
   DynamicScene::Scene *scene;
   PathTracer* pathtracer;
+  gpuPathTracer* gpuPathtracer;
 
   // View Frustrum Variables.
   // On resize, the aspect ratio is changed. On reset_camera, the position and

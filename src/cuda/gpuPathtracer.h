@@ -2,9 +2,6 @@
 #define gpu_pathtracer_h
 
 #include "../pathtracer.h"
-#include "gpuRay.h"
-#include "gpuMesh.h"
-#include "gpuTriangle.h"
 
 using namespace CMU462;
 
@@ -45,13 +42,6 @@ class gpuPathTracer{
      */
 
   private:
-    
-    void build_accel();
-
-    __device__ bool trace_ray(const gpuRay& ray);
-
-    __device__ bool raytrace_pixel(size_t x, size_t y);
-
 
     // Components //
     PathTracer * pathtracer;
@@ -59,8 +49,6 @@ class gpuPathTracer{
     bool* imagePixels;
     size_t w;
     size_t h;
-    gpuMesh* mesh;
-    gpuTriangle* primitives;
 };
 
     

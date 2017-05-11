@@ -30,6 +30,7 @@ Application::Application(AppConfig config) {
     config.pathtracer_num_threads,
     config.pathtracer_envmap
   );
+  gpuPathtracer = new gpuPathTracer(pathtracer);
 
 }
 
@@ -140,6 +141,9 @@ void Application::render() {
       if (show_coordinates) draw_coordinates();
     case RENDER_MODE:
       pathtracer->update_screen();
+      break;
+    case GPU_RENDER_MODE:
+      gpuPathtracer->update_screen();
       break;
   }
 }
@@ -453,10 +457,16 @@ void Application::keyboard_event(int key, int event, unsigned char mods) {
     case EDIT_MODE:
       if (event == EVENT_PRESS) {
         switch(key) {
-          case 'r': case 'R':
+          case 'r':
             set_up_pathtracer();
             pathtracer->start_raytracing();
             mode = RENDER_MODE;
+            break;
+          case 'R':
+            set_up_pathtracer();
+            set_up_gpuPathtracer();
+            gpuPathtracer->start_raytrace();
+            mode = GPU_RENDER_MODE;
             break;
           case 'v': case 'V':
             set_up_pathtracer();
@@ -583,6 +593,13 @@ void Application::set_up_pathtracer() {
   pathtracer->set_camera(&camera);
   pathtracer->set_scene(scene->get_static_scene());
   pathtracer->set_frame_size(screenW, screenH);
+}
+
+void Application::set_up_gpuPathtracer() {
+  if (mode != EDIT_MODE) return;
+  gpuPathtracer->load_camera();
+  gpuPathtracer->load_scene();
+  gpuPathtracer->set_frame_size(screenW, screenH);
 
 }
 
