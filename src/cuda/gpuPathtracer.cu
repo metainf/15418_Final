@@ -13,15 +13,18 @@ gpuMesh* mesh;
 gpuTriangle* primitives;
 gpuCamera* camera;
 
+// returns the result of ray tracing intersection with the scene primitives
 __device__ bool trace_ray(const gpuRay& ray)
 {
   //bvh->intersect(r);
 }
 
+// Using the x and y position of the pixel, create a ray and use trace_ray
 __device__ bool raytrace_pixel(size_t x, size_t y)
 {
 }
 
+// kernel for doing raytracing
 __global__ void render()
 {
 }
@@ -96,11 +99,32 @@ void gpuPathTracer::set_frame_size(size_t width, size_t height)
   cudaMalloc((void**)&imagePixels,sizeof(bool) * w * h);
 }
 
+// Takes the bool imagePixels and draws it on the screen as b/w pixels
 void gpuPathTracer::update_screen()
 {
+  Color white(1, 1, 1, 1);
+  Color black(0, 0, 0, 0);
+
+  bool *tmp = new bool[w * h];
+  cudaMemcpy(tmp, imagePixels, w * h * sizeof(bool),  cudaMemcpyDeviceToHost);
+  //copy imagePixels into pathtracer->frameBuffer
+  for(size_t i = 0; i < h; i++) {
+    for(size_t j = 0; j < w; j++) {
+      if(tmp[i * w + j]) {
+        pathtracer->frameBuffer.update_pixel(black, j, i);
+      }
+      else {
+        pathtracer->frameBuffer.update_pixel(white, j, i);
+      }
+    }
+  }
+  delete[] tmp;
+  pathtracer->doneState();
 }
 
+// Wrapper for lanching the render() kernel
 void gpuPathTracer::start_raytrace()
 {
+  
 }
 

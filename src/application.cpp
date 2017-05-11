@@ -144,6 +144,7 @@ void Application::render() {
       break;
     case GPU_RENDER_MODE:
       gpuPathtracer->update_screen();
+      pathtracer->update_screen();
       break;
   }
 }

@@ -32,7 +32,7 @@ class gpuPathTracer{
     void update_screen();
 
     /*
-     * starts the ray tracing kernel
+     * Wrapper for the ray tracing kernel
      */
     void start_raytrace();
 

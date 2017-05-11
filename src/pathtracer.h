@@ -145,6 +145,11 @@ class PathTracer {
   void save_image();
 
   BVHAccel* bvh;                 ///< BVH accelerator aggregate
+  ImageBuffer frameBuffer;       ///< frame buffer
+
+  void doneState() {
+    state = DONE;
+  }
  private:
 
   /**
@@ -228,7 +233,6 @@ class PathTracer {
   Sampler2D* gridSampler;        ///< samples unit grid
   Sampler3D* hemisphereSampler;  ///< samples unit hemisphere
   HDRImageBuffer sampleBuffer;   ///< sample buffer
-  ImageBuffer frameBuffer;       ///< frame buffer
   Timer timer;                   ///< performance test timer
 
   // Internals //
