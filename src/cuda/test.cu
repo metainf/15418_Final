@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include "hello.h"
 #include "gpuVector3D.h"
-#include "../../CMU462/include/CMU462/CMU462.h"
 
 #define CHK(ans) gpuAssert((ans), __FILE__, __LINE__);
 #define POSTKERNEL CHK(cudaPeekAtLastError())
+
+using namespace CMU462;
 
 inline void gpuAssert(cudaError_t code, const char *file, int line)
 {
@@ -51,7 +52,7 @@ int main_test()
   cudaFree( bd );
 
   printf("%s\n", a);
-  gpuVector3D v1(1,1,3);
+  Vector3D v1(1,1,3);
   gpuVector3D v2(1,1,1);
   gpuVector3D v3;
   
