@@ -11,9 +11,13 @@ using namespace StaticScene;
 gpuMesh* mesh;
 gpuTriangle* primitives;
 
-__device__ bool trace_ray(const gpuRay& ray);
+__device__ bool trace_ray(const gpuRay& ray)
+{
+}
 
-__device__ bool raytrace_pixel(size_t x, size_t y);
+__device__ bool raytrace_pixel(size_t x, size_t y)
+{
+}
 
 __global__ void render()
 {
@@ -24,6 +28,7 @@ gpuPathTracer::gpuPathTracer(PathTracer *__pathtracer)
 {
   pathtracer = __pathtracer;
 }
+
 gpuPathTracer::~gpuPathTracer() {
   cudaFree(mesh);
   cudaFree(primitives);
