@@ -12,6 +12,8 @@ class gpuVector3D {
 
     __device__ __host__ gpuVector3D(double c): x(c), y(c), z(c){}
 
+    //gpuVector3D(Vector3D ve)
+
     // returns reference to the specified component (0-based indexing: x, y, z)
     __device__ __host__ inline double& operator[] ( const int& index ) {
       return ( &x )[ index ];

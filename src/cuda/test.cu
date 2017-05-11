@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "hello.h"
 #include "gpuVector3D.h"
+#include "../../CMU462/include/CMU462/CMU462.h"
 
 #define CHK(ans) gpuAssert((ans), __FILE__, __LINE__);
 #define POSTKERNEL CHK(cudaPeekAtLastError())
