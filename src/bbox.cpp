@@ -16,23 +16,31 @@ bool BBox::intersect(const Ray& r, double& t0, double& t1) const {
   // Implement ray - bounding box intersection test
   // If the ray intersected the bouding box within the range given by
   // t0, t1, update t0 and t1 with the new intersection times.
-
-  double tx1 = (min.x - r.o.x) / r.d.x;
-  double tx2 = (max.x - r.o.x) / r.d.x;
-  double txmin = MIN(tx1, tx2);
-  double txmax = MAX(tx1, tx2);
+  if(r.d.x != 0.0)
+  {
+    double tx1 = (min.x - r.o.x) / r.d.x;
+    double tx2 = (max.x - r.o.x) / r.d.x;
+    t0 = std::max(t0,std::min(tx1,tx2));
+    t1 = std::min(t1,std::max(tx1,tx2));
+  }
   
-  double ty1 = (min.y - r.o.y) / r.d.y;
-  double ty2 = (max.y - r.o.y) / r.d.y;
-  double tymin = MIN(ty1, ty2);
-  double tymax = MAX(ty1, ty2);
+  if(r.d.y != 0.0)
+  {
+    double ty1 = (min.y - r.o.y) / r.d.y;
+    double ty2 = (max.y - r.o.y) / r.d.y;
+    t0 = std::max(t0,std::min(ty1,ty2));
+    t1 = std::min(t1,std::max(ty1,ty2));
+  }
 
-  double tz1 = (min.z - r.o.z) / r.d.z; 
-  double tz2 = (min.z - r.o.z) / r.d.z;
-  double tzmin = MIN(tz1, tz2);
-  double tzmax = MAX(tz1, tz2);
+  if(r.d.z != 0.0)
+  {
+    double tz1 = (min.z - r.o.z) / r.d.z; 
+    double tz2 = (max.z - r.o.z) / r.d.z;
+    t0 = std::max(t0,std::min(tz1,tz2));
+    t1 = std::min(t1,std::max(tz1,tz2));
+  }
 
-  double tmin = MAX(MAX(t0, txmin), MAX(tymin, tzmin));
+  /*double tmin = MAX(MAX(t0, txmin), MAX(tymin, tzmin));
   double tmax = MIN(MIN(t1, txmax), MIN(tymax, tzmax));
 
   if(tmin <= tmax && tmax >= 0) {
@@ -41,7 +49,8 @@ bool BBox::intersect(const Ray& r, double& t0, double& t1) const {
     return true;
   }
 
-  return false;
+  return false;*/
+  return t0 <= t1;
   
 }
 
