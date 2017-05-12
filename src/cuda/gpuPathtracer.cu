@@ -85,6 +85,7 @@ gpuPathTracer::~gpuPathTracer() {
 
 void gpuPathTracer::load_scene()
 {
+  timer.start();
   // using the CPU's bvh, load the mesh information
   size_t num_tri = pathtracer->bvh->primitives.size();
   cudaMemcpyToSymbol(numPrim,&num_tri,sizeof(size_t));
@@ -122,8 +123,9 @@ void gpuPathTracer::load_scene()
   cudaMemcpy(gpu_primitives,temp_tri,sizeof(gpuTriangle) * num_tri,
       cudaMemcpyHostToDevice);
   cudaMemcpyToSymbol(primitives,&gpu_primitives,sizeof(gpuTriangle*));
+  timer.stop();
 
-  printf("[GPU Pathtracer]: finished loading scene\n");
+  printf("[GPU Pathtracer]: finished loading scene (%.4f sec)\n",timer.duration());
 }
 
 void gpuPathTracer::load_camera(Camera *cam)
@@ -178,9 +180,11 @@ void gpuPathTracer::update_screen()
 // Wrapper for lanching the render() kernel
 void gpuPathTracer::start_raytrace()
 {
+  timer.start();
   size_t numBlocks = (w * h + 31 -1)/32;
   render<<<numBlocks,32>>>(camera);
   cudaDeviceSynchronize();
-  printf("[GPU Pathtracer]: finished rendering scene\n");
+  timer.stop();
+  printf("[GPU Pathtracer]: finished rendering scene (%.4f sec)\n",timer.duration());
 }
 

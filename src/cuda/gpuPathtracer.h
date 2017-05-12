@@ -47,6 +47,7 @@ class gpuPathTracer{
     PathTracer * pathtracer;
     size_t w;
     size_t h;
+    Timer timer;
 };
 
     
