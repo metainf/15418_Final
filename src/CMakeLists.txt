@@ -81,6 +81,7 @@ cuda_add_library(cuda_lib
   cuda/gpuMatrix4x4.cu
   cuda/gpuMatrix3x3.cu
   cuda/gpuCamera.cu
+  cuda/gpuBvh.cu
   )
 
 target_link_libraries( cuda_lib

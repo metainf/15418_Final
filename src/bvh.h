@@ -137,8 +137,7 @@ class BVHAccel : public Aggregate {
    * Draw the BVH outline with OpenGL - used in visualizer
    */
   void drawOutline(const Color& c) const { }
-
- private:
+  
   std::vector<BVHNode*> *tree;
 };
 

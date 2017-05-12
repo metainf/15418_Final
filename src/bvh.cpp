@@ -251,20 +251,48 @@ namespace CMU462 { namespace StaticScene {
           }
         }
       }
-      else if(right != NULL) {
-        //check if right node bounding box intersects, add to stack
-        if(right->bb.intersect(ray, ray.min_t, ray.max_t)) {
-          nodes.push(right);
+      else {
+        if(left == NULL) {
+          //check if right node bounding box intersects, add to stack
+          double t0 = ray.min_t;
+          double t1 = ray.max_t;
+          if(right->bb.intersect(ray, t0, t1)) {
+            nodes.push(right);
+          }
         }
-      }
-      else if(left != NULL) {
-        //check if left node intersetcs, add to stack
-        if(left->bb.intersect(ray, ray.min_t, ray.max_t)) {
-          nodes.push(left);
+        else if(right == NULL) {
+          //check if left node intersetcs, add to stack
+          double t0 = ray.min_t;
+          double t1 = ray.max_t;
+          if(left->bb.intersect(ray, t0, t1)) {
+            nodes.push(left);
+          }
+        }
+        else {
+          double t0 = ray.min_t;
+          double t1 = ray.max_t;
+          double t2 = ray.min_t;
+          double t3 = ray.max_t;
+          bool leftHit = left->bb.intersect(ray, t0, t1);
+          bool rightHit = right->bb.intersect(ray, t2, t3);
+          
+          if(leftHit && rightHit) {
+            BVHNode *first = (t0 <= t2) ? left : right;
+            BVHNode *second = (t0 <= t2) ? right : left;
+            nodes.push(first);
+            nodes.push(second);
+          }
+          else if (leftHit) {
+            nodes.push(left);
+          }
+          else if (rightHit) {
+            nodes.push(right);
+          }
         }
       }
     }
     return hit;
+ 
   }
 
   bool BVHAccel::intersect(const Ray &ray, Intersection *i) const {

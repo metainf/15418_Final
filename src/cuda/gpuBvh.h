@@ -1,15 +1,12 @@
 #ifndef GPU_BVH_H
 #define GPU_BVH_H
 
-#include "static_scene/scene.h"
-#include "static_scene/aggregate.h"
+#include "../bvh.h"
+#include "gpuTriangle.h"
 
 #include <vector>
 
 #define BUCKET_NUM 4
-
-namespace CMU462 { namespace StaticScene {
-
 
 /**
  * A node in the BVH accelerator aggregate.
@@ -23,9 +20,15 @@ namespace CMU462 { namespace StaticScene {
  */
 struct gpuBVHNode {
 
-  gpuBVHNode(gpuBBox bb, size_t start, size_t range)
-      : bb(bb), start(start), range(range), l(-1), r(-1) { }
+  __device__ __host__
+  gpuBVHNode()
+      : bb(gpuBBox()), start(0), range(0), l(-1), r(-1) {}
+  
+  __device__ __host__
+  gpuBVHNode(BVHNode *n)
+      : bb(gpuBBox(n->bb)), start(n->start), range(n->range), l(n->l), r(n->r) {}
 
+  __device__
   inline bool isLeaf() const { return l == -1 && r == -1; }
 
   gpuBBox bb;        ///< bounding box of the node
@@ -37,12 +40,46 @@ struct gpuBVHNode {
 
 struct gpuP_bucket {
   
-  gpuP_bucket()
+  __device__  gpuP_bucket()
     : bb(gpuBBox()), num_prim(0) {}
   gpuBBox bb;
   size_t num_prim;
 };
   
+
+/* BVH Traversal array stack */
+struct gpuStack{
+  
+  __host__
+  gpuStack() : size(0), pos(0) {}
+
+  __host__
+  gpuStack(size_t size) : size(size), pos(0) {
+    nodes = new gpuBVHNode *[size];
+  }
+
+  __device__ inline void push(gpuBVHNode *node) {
+    if (pos == size) {
+      return;
+    }
+    nodes[pos] = node;
+    pos++;
+  }
+
+  __device__ inline gpuBVHNode *pop() {
+    if (pos == 0) {
+      return NULL;
+    }
+    pos--;
+    return nodes[pos];
+  }
+
+  __device__ inline bool isEmpty() { return pos == 0; }
+
+  size_t size;
+  size_t pos;
+  gpuBVHNode **nodes;
+};
 
 /**
  * Bounding Volume Hierarchy for fast Ray - Primitive intersection.
@@ -54,7 +91,15 @@ struct gpuP_bucket {
 class gpuBVHAccel {
  public:
 
-  BVHAccel () { }
+   __host__
+  gpuBVHAccel (vector<BVHNode *> t, gpuTriangle *_primitives) {
+    tree = new gpuBVHNode *[t.size()];
+    this->primitives = _primitives;
+    for(int i = 0; i < t.size(); i++) {
+      tree[i] = new gpuBVHNode(t[i]);
+    }
+    stack = gpuStack(t.size());
+  }
 
   /**
    * Parameterized Constructor.
@@ -63,21 +108,23 @@ class gpuBVHAccel {
    * in memory for the aggregate to function properly.
    * \param primitives primitives to build from
    * \param max_leaf_size maximum number of primitives to be stored in leaves
+   *
+  gpuBVHAccel(const std::vector<gpuTriangle*>& primitives, size_t max_leaf_size = 4);
    */
-  BVHAccel(const std::vector<Primitive*>& primitives, size_t max_leaf_size = 4);
 
   /**
    * Destructor.
    * The destructor only destroys the Aggregate itself, the primitives that
    * it contains are left untouched.
    */
-  ~BVHAccel();
+  ~gpuBVHAccel();
 
   /**
    * Get the world space bounding box of the aggregate.
    * \return world space bounding box of the aggregate
    */
-  BBox get_bbox() const;
+  __device__
+  gpuBBox get_bbox() const;
 
   /**
    * Ray - Aggregate intersection.
@@ -87,7 +134,8 @@ class gpuBVHAccel {
    * \return true if the given ray intersects with the aggregate,
              false otherwise
    */
-  bool intersect(const Ray& r) const;
+  __device__
+  bool intersect(const gpuRay& ray) ;
 
   /**
    * Ray - Aggregate intersection 2.
@@ -102,31 +150,26 @@ class gpuBVHAccel {
    * \return true if the given ray intersects with the aggregate,
              false otherwise
    */
-  bool intersect(const Ray& r, Intersection* i) const;
-
-  /**
-   * Get BSDF of the surface material
-   * Note that this does not make sense for the BVHAccel aggregate
-   * because it does not have a surface material. Therefore this
-   * should always return a null pointer.
-   */
-  BSDF* get_bsdf() const { return NULL; }
+  bool intersect(const gpuRay& r, Intersection* i) const;
 
   /**
    * Get entry point (root) - used in visualizer
    */
-  gpuBVHNode* get_root() const { return (*tree)[0]; }
+  __device__
+  gpuBVHNode* get_root() const { return tree[0]; }
 
 
   /*
    * Returns the left child of the node
    */
-  gpuBVHNode* get_l_child(gpuBVHNode* node) const {return (node->l < 0) ? NULL:(*tree)[node->l];}
+  __device__
+  gpuBVHNode* get_l_child(gpuBVHNode* node) const {return (node->l < 0) ? NULL: tree[node->l];}
 
   /*
    * Returns the left child of the node
    */
-  gpuBVHNode* get_r_child(gpuBVHNode * node) const {return(node->r < 0)? NULL: (*tree)[node->r];}
+  __device__
+  gpuBVHNode* get_r_child(gpuBVHNode * node) const {return(node->r < 0)? NULL: tree[node->r];}
 
   /**
    * Draw the BVH with OpenGL - used in visualizer
@@ -139,10 +182,9 @@ class gpuBVHAccel {
   void drawOutline(const Color& c) const { }
 
  private:
-  std::vector<gpuBVHNode*> *tree;
+  gpuBVHNode **tree;
+  gpuTriangle *primitives;
+  gpuStack stack;
 };
-
-} // namespace StaticScene
-} // namespace CMU462
 
 #endif // GPU_BVH_H

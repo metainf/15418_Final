@@ -1,6 +1,12 @@
+#ifndef GPU_BBOX_H
+#define GPU_BBOX_H
+
 #include "gpuVector3D.h"
 #include "gpuRay.h"
 #include "math_constants.h"
+#include "../bbox.h"
+
+using namespace CMU462;
 
 struct gpuBBox {
 
@@ -47,6 +53,17 @@ struct gpuBBox {
     max = gpuVector3D(maxX, maxY, maxZ);
     extent = max - min;
   }
+
+  /**
+   * Constructor.
+   * Creates a gpu bounding box from a cpu bounding box
+   */
+  __device__ __host__
+    gpuBBox(BBox bb) {
+      min = gpuVector3D(bb.min.x, bb.min.y, bb.min.z);
+      max = gpuVector3D(bb.max.x, bb.max.y, bb.max.z);
+      extent = max - min;
+    }
   
   /**
    * Expand the bounding box to include another (union).
@@ -118,3 +135,5 @@ struct gpuBBox {
  __device__ bool intersect(const gpuRay& r, double& t0, double& t1) const;
 
 };
+
+#endif
