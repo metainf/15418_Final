@@ -16,7 +16,7 @@ struct gpuRay {
 
   /* Constructors */
   __device__
-    gpuRay(gpuVector3D o, gpuVector3D d, int depth = 0)
+    gpuRay(gpuVector3D& o, gpuVector3D& d, int depth = 0)
       : o(o), d(d), min_t(0.0), depth(depth) {
     inv_d = gpuVector3D(1 / d.x, 1 / d.y, 1 / d.z);
     sign[0] = (inv_d.x < 0);

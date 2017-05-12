@@ -81,8 +81,8 @@ bool gpuTriangle::intersect(gpuRay r, gpuVector3D* pos){
 
   gpuVector3D sol = 1/denom * gpuVector3D(u,v,t);
 
-  if(0 <= sol[0] && sol[0] < 1 && 
-      0 <= sol[1] && sol[1] < 1 &&
+  if(0 <= sol[0] && 0 <= sol[1] && 
+      sol[0] + sol[1] < 1 &&
       r.min_t <= sol[2] && sol[2] <= r.max_t)
   {
     r.max_t = sol[2];
