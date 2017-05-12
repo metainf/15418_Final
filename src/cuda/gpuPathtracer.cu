@@ -7,9 +7,12 @@
 #include "gpuVector3D.cu"
 #include "gpuCamera.cu"
 
+#ifdef DEBUG
 #define CHK(ans) {gpuAssert((ans), __FILE__, __LINE__);}
 #define POSTKERNEL CHK(cudaPeekAtLastError())
-
+#else
+#define CHK(ans)
+#endif
 inline void gpuAssert(cudaError_t code, const char *file, int line)
 {
   if (code != cudaSuccess) {
@@ -39,7 +42,6 @@ __device__ bool trace_ray(const gpuRay& ray)
 {
   for(size_t i = 0; i < numPrim; i++)
   {
-    printf("test\n");
     if(primitives[i].intersect(ray))
       return true;
   }
@@ -59,9 +61,9 @@ __global__ void render()
   size_t index = blockIdx.x * blockDim.x + threadIdx.x;
   size_t x = index % w_d;
   size_t y = index / w_d;
+  printf("%u\n", index);
   if(x < w_d && y < h_d)
   {
-    printf("%u\n", index);
     imagePixels_const[index] = true;//raytrace_pixel(x,y);
   }
 }
@@ -74,10 +76,10 @@ gpuPathTracer::gpuPathTracer(PathTracer *__pathtracer)
 }
 
 gpuPathTracer::~gpuPathTracer() {
-    cudaFree(camera);
-    cudaFree(imagePixels);
-    cudaFree(gpu_primitives);
-    cudaFree(gpu_mesh);
+  cudaFree(camera);
+  cudaFree(imagePixels);
+  cudaFree(gpu_primitives);
+  cudaFree(gpu_mesh);
 }
 
 void gpuPathTracer::load_scene()
@@ -92,22 +94,22 @@ void gpuPathTracer::load_scene()
   // Copy over the vertices and normals of the mesh
   gpuVector3D *pos_d;
   gpuVector3D *norm_d;
-  
-    CHK(cudaMalloc((void**)&pos_d,sizeof(gpuVector3D) * numVerts));
-    CHK(cudaMalloc((void**)&norm_d,sizeof(gpuVector3D) * numVerts));
 
-  CHK(cudaMemcpy(pos_d, cpu_mesh->positions, sizeof(gpuVector3D) * numVerts,
-        cudaMemcpyHostToDevice));
-  CHK(cudaMemcpy(norm_d, cpu_mesh->normals, sizeof(gpuVector3D) * numVerts,
-        cudaMemcpyHostToDevice));
+  cudaMalloc((void**)&pos_d,sizeof(gpuVector3D) * numVerts);
+  cudaMalloc((void**)&norm_d,sizeof(gpuVector3D) * numVerts);
+
+  cudaMemcpy(pos_d, cpu_mesh->positions, sizeof(gpuVector3D) * numVerts,
+        cudaMemcpyHostToDevice);
+  cudaMemcpy(norm_d, cpu_mesh->normals, sizeof(gpuVector3D) * numVerts,
+        cudaMemcpyHostToDevice);
 
   // Group the mesh info into a gpuMesh
   gpuMesh gpu_mesh_tmp(pos_d,norm_d);
-  
-    CHK(cudaMalloc((void**)&gpu_mesh,sizeof(gpuMesh)));
 
-  CHK(cudaMemcpy(gpu_mesh,&gpu_mesh_tmp, sizeof(gpuMesh),cudaMemcpyHostToDevice));
-  CHK(cudaMemcpyToSymbol(mesh,&gpu_mesh,sizeof(gpuMesh*)));
+  cudaMalloc((void**)&gpu_mesh,sizeof(gpuMesh));
+
+  cudaMemcpy(gpu_mesh,&gpu_mesh_tmp, sizeof(gpuMesh),cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(mesh,&gpu_mesh,sizeof(gpuMesh*));
 
   // Copy over the triangles
   gpuTriangle* temp_tri = new gpuTriangle[num_tri];
@@ -118,10 +120,10 @@ void gpuPathTracer::load_scene()
         ((Triangle*)(pathtracer->bvh->primitives[i]))->v2,
         ((Triangle*)(pathtracer->bvh->primitives[i]))->v3);
   }
-    CHK(cudaMalloc((void**)&gpu_primitives,sizeof(gpuTriangle) * num_tri));
-  CHK(cudaMemcpy(gpu_primitives,temp_tri,sizeof(gpuTriangle) * num_tri,
-      cudaMemcpyHostToDevice));
-  CHK(cudaMemcpyToSymbol(primitives,&gpu_primitives,sizeof(gpuTriangle*)));
+  cudaMalloc((void**)&gpu_primitives,sizeof(gpuTriangle) * num_tri);
+  cudaMemcpy(gpu_primitives,temp_tri,sizeof(gpuTriangle) * num_tri,
+        cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(primitives,&gpu_primitives,sizeof(gpuTriangle*));
 
   printf("[GPU Pathtracer]: finished loading scene\n");
 }
@@ -130,10 +132,9 @@ void gpuPathTracer::load_camera(Camera *cam)
 {
   gpuCamera temp = gpuCamera(cam->c2w, cam->position(),
       cam->screenW, cam->screenH, cam->screenDist);
-  printf("fail");
-    CHK(cudaMalloc((void**)&camera,sizeof(gpuCamera)));
-  CHK(cudaMemcpy(camera,&temp,sizeof(gpuCamera),cudaMemcpyHostToDevice));
-  CHK(cudaMemcpyToSymbol(camera_const,&camera,sizeof(gpuCamera*),cudaMemcpyHostToDevice));
+  cudaMalloc((void**)&camera,sizeof(gpuCamera));
+  cudaMemcpy(camera,&temp,sizeof(gpuCamera),cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(camera_const,&camera,sizeof(gpuCamera*),cudaMemcpyHostToDevice);
 }
 
 void gpuPathTracer::set_frame_size(size_t width, size_t height)
@@ -141,12 +142,12 @@ void gpuPathTracer::set_frame_size(size_t width, size_t height)
   w = width;
   h = height;
 
-  CHK(cudaMemcpyToSymbol(w_d,&w,sizeof(size_t)));
-  CHK(cudaMemcpyToSymbol(h_d,&h,sizeof(size_t)));
-  
+  cudaMemcpyToSymbol(w_d,&w,sizeof(size_t));
+  cudaMemcpyToSymbol(h_d,&h,sizeof(size_t));
+
   // reallocate the imagePixels buffer
-    CHK(cudaMalloc((void**)&imagePixels,sizeof(bool) * w * h));
-  CHK(cudaMemcpyToSymbol(imagePixels_const,&imagePixels,sizeof(bool*)));
+  cudaMalloc((void**)&imagePixels,sizeof(bool) * w * h);
+  cudaMemcpyToSymbol(imagePixels_const,&imagePixels,sizeof(bool*));
 }
 
 // Takes the bool imagePixels and draws it on the screen as b/w pixels
@@ -156,8 +157,8 @@ void gpuPathTracer::update_screen()
   Color black(0, 0, 0, 0);
 
   bool *tmp = new bool[w * h];
-  CHK(cudaMemcpy(tmp, imagePixels, w * h * sizeof(bool),
-        cudaMemcpyDeviceToHost));
+  cudaMemcpy(tmp, imagePixels, w * h * sizeof(bool),
+        cudaMemcpyDeviceToHost);
   //copy imagePixels into pathtracer->frameBuffer
   for(size_t i = 0; i < h; i++) {
     for(size_t j = 0; j < w; j++) {
@@ -179,5 +180,6 @@ void gpuPathTracer::start_raytrace()
   size_t numBlocks = (w * h + 31 -1)/32;
   render<<<32,32>>>();
   cudaDeviceSynchronize();
+  printf("[GPU Pathtracer]: finished rendering scene\n");
 }
 

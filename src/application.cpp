@@ -406,7 +406,7 @@ void Application::mouse_event(int key, int event, unsigned char mods) {
 
 void Application::keyboard_event(int key, int event, unsigned char mods) {
   switch (mode) {
-    case RENDER_MODE:
+    case RENDER_MODE: case GPU_RENDER_MODE:
       if (event == EVENT_PRESS) {
         switch (key) {
         case 'e': case 'E':
