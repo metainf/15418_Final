@@ -69,19 +69,17 @@ bool gpuTriangle::intersect(gpuRay r, gpuVector3D* pos){
   gpuVector3D e1Xd = cross(e1,r.d);
   gpuVector3D sXe2 = cross(s,e2);
 
-  double denom = s.x;//dot(e1Xd, e2);
+  double denom = dot(e1Xd, e2);
 
   if(denom == 0.0) {
     return false;
   }
 
-  return true;
   double u = -dot(sXe2, r.d);
   double v = dot(e1Xd, s);
   double t = -dot(sXe2, e1);
 
   gpuVector3D sol = 1/denom * gpuVector3D(u,v,t);
-  printf("%f\n",sol[2]);
 
   if(0 <= sol[0] && sol[0] < 1 && 
       0 <= sol[1] && sol[1] < 1 &&

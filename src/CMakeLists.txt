@@ -75,6 +75,7 @@ set(
   ${CUDA_NVCC_FLAGS};
   -O3 -gencode arch=compute_61,code=sm_61
   --std=c++11
+  -g -G
   )
 
 #cuda_add_library(cuda_lib

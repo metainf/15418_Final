@@ -25,7 +25,7 @@ using namespace CMU462;
 using namespace StaticScene;
 
 __constant__ gpuTriangle* primitives;
-__constant__ gpuCamera* camera_const;
+//__constant__ gpuCamera* camera_const;
 __constant__ bool* imagePixels_const;
 __constant__ size_t w_d;
 __constant__ size_t h_d;
@@ -49,14 +49,14 @@ __device__ bool trace_ray(gpuRay ray)
 }
 
 // Using the x and y position of the pixel, create a ray and use trace_ray
-__device__ bool raytrace_pixel(size_t x, size_t y)
+__device__ bool raytrace_pixel(size_t x, size_t y,gpuCamera* cam)
 {
   gpuVector3D p((x + 0.5)/w_d,(y + 0.5)/h_d,0);
-  return trace_ray(camera_const->generate_ray(p.x,p.y));
+  return trace_ray(cam->generate_ray(p.x,p.y));
 }
 
 // kernel for doing raytracing
-__global__ void render()
+__global__ void render(gpuCamera* cam)
 {
   size_t index = blockIdx.x * blockDim.x + threadIdx.x;
   size_t x = index % w_d;
@@ -64,7 +64,7 @@ __global__ void render()
   //printf("%u\n", index);
   if(x < w_d && y < h_d)
   {
-    imagePixels_const[index] = raytrace_pixel(x,y);
+    imagePixels_const[index] = raytrace_pixel(x,y,cam);
   }
 }
 
@@ -130,7 +130,10 @@ void gpuPathTracer::load_camera(Camera *cam)
       cam->screenW, cam->screenH, cam->screenDist);
   cudaMalloc((void**)&camera,sizeof(gpuCamera));
   cudaMemcpy(camera,&temp,sizeof(gpuCamera),cudaMemcpyHostToDevice);
-  cudaMemcpyToSymbol(camera_const,&camera,sizeof(gpuCamera*),cudaMemcpyHostToDevice);
+  cudaMemcpy(&temp,camera,sizeof(gpuCamera),cudaMemcpyDeviceToHost);
+  printf("w %u, h %u, d %f\n",temp.screenW, temp.screenH, temp.screenDist);
+  printf("w %u, h %u, d %f\n",cam->screenW, cam->screenH, cam->screenDist);
+  //cudaMemcpyToSymbol(camera_const,camera,sizeof(gpuCamera*),cudaMemcpyHostToDevice);
 }
 
 void gpuPathTracer::set_frame_size(size_t width, size_t height)
@@ -174,7 +177,7 @@ void gpuPathTracer::update_screen()
 void gpuPathTracer::start_raytrace()
 {
   size_t numBlocks = (w * h + 31 -1)/32;
-  render<<<numBlocks,32>>>();
+  render<<<numBlocks,32>>>(camera);
   cudaDeviceSynchronize();
   printf("[GPU Pathtracer]: finished rendering scene\n");
 }

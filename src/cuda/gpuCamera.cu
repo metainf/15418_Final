@@ -12,7 +12,6 @@ class gpuCamera {
     
     __device__ gpuRay generate_ray(double x, double y);
 
-  private:
     gpuVector3D pos;
     gpuMatrix3x3 c2w;
     size_t screenW, screenH;
