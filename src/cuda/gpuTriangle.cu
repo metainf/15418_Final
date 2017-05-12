@@ -1,3 +1,6 @@
+#ifndef gpu_triangle
+#define gpu_triangle
+
 #include "gpuBBox.cu"
 #include "gpuVector3D.cu"
 #include "gpuRay.cu"
@@ -11,12 +14,12 @@ class gpuTriangle {
   public:
     __host__ gpuTriangle(){}
 
-    __host__ gpuTriangle(const Mesh* mesh_cpu, 
+    __host__ gpuTriangle(const Mesh* mesh_cpu, gpuVector3D* pos, 
         size_t v1, size_t v2, size_t v3);
 
-    __device__ gpuBBox get_bbox(gpuVector3D* pos);
+    __device__ gpuBBox get_bbox();
 
-    __device__ bool intersect(gpuRay r,gpuVector3D* pos);
+    __device__ bool intersect(gpuRay r);
 
     __device__ gpuVector3D get_center();
     
@@ -25,12 +28,13 @@ class gpuTriangle {
     size_t v3;
   private:
     gpuVector3D centroid;
+    gpuVector3D* pos;
 };
 
 __host__
-gpuTriangle::gpuTriangle(const Mesh* mesh_cpu,
+gpuTriangle::gpuTriangle(const Mesh* mesh_cpu, gpuVector3D* pos,
     size_t v1, size_t v2, size_t v3):
-  v1(v1), v2(v2), v3(v3){
+  pos(pos), v1(v1), v2(v2), v3(v3){
     Vector3D p1 = mesh_cpu->positions[v1];
     Vector3D p2 = mesh_cpu->positions[v2];
     Vector3D p3 = mesh_cpu->positions[v3];
@@ -40,7 +44,7 @@ gpuTriangle::gpuTriangle(const Mesh* mesh_cpu,
   }
 
 __device__
-gpuBBox gpuTriangle::get_bbox(gpuVector3D* pos){
+gpuBBox gpuTriangle::get_bbox(){
 
   // TODO: 
   // compute the bounding box of the triangle
@@ -59,7 +63,7 @@ gpuBBox gpuTriangle::get_bbox(gpuVector3D* pos){
 }
 
 __device__
-bool gpuTriangle::intersect(gpuRay r, gpuVector3D* pos){
+bool gpuTriangle::intersect(gpuRay r){
 
   // TODO: implement ray-triangle intersection
   gpuVector3D e1 = pos[v2] - pos[v1];
@@ -96,3 +100,4 @@ __device__
 gpuVector3D gpuTriangle::get_center(){
   return centroid;
 }
+#endif

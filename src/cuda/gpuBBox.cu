@@ -1,6 +1,13 @@
+#ifndef gpu_bbox
+#define gpu_bbox
+
 #include "gpuVector3D.cu"
 #include "gpuRay.cu"
 #include "math_constants.h"
+
+#define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
+#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
+
 
 struct gpuBBox {
 
@@ -47,6 +54,13 @@ struct gpuBBox {
     max = gpuVector3D(maxX, maxY, maxZ);
     extent = max - min;
   }
+
+  __device__ __host__
+    gpuBBox(BBox bb) {
+      min = gpuVector3D(bb.min.x, bb.min.y, bb.min.z);
+      max = gpuVector3D(bb.max.x, bb.max.y, bb.max.z);
+      extent = max - min;
+    }
   
   /**
    * Expand the bounding box to include another (union).
@@ -115,6 +129,33 @@ struct gpuBBox {
    * \param t0 lower bound of intersection time
    * \param t1 upper bound of intersection time
    */
- __device__ bool intersect(const gpuRay r, double t0, double t1) const;
+ __device__ bool intersect(const gpuRay r, double t0, double t1) const {
+  double tx1 = (min.x - r.o.x) / r.d.x;
+  double tx2 = (max.x - r.o.x) / r.d.x;
+  double txmin = MIN(tx1, tx2);
+  double txmax = MAX(tx1, tx2);
+  
+  double ty1 = (min.y - r.o.y) / r.d.y;
+  double ty2 = (max.y - r.o.y) / r.d.y;
+  double tymin = MIN(ty1, ty2);
+  double tymax = MAX(ty1, ty2);
+
+  double tz1 = (min.z - r.o.z) / r.d.z; 
+  double tz2 = (min.z - r.o.z) / r.d.z;
+  double tzmin = MIN(tz1, tz2);
+  double tzmax = MAX(tz1, tz2);
+
+  double tmin = MAX(MAX(t0, txmin), MAX(tymin, tzmin));
+  double tmax = MIN(MIN(t1, txmax), MIN(tymax, tzmax));
+
+  if(tmin <= tmax && tmax >= 0) {
+    t1 = tmax;
+    t0 = tmin;
+    return true;
+  }
+
+  return false;
+ }
 
 };
+#endif

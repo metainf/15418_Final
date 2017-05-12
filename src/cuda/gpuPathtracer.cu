@@ -6,6 +6,8 @@
 #include "gpuTriangle.cu"
 #include "gpuVector3D.cu"
 #include "gpuCamera.cu"
+//#include "gpuBvh.cu"
+#include "gpuBBox.cu"
 
 #ifdef DEBUG
 #define CHK(ans) {gpuAssert((ans), __FILE__, __LINE__);}
@@ -42,7 +44,7 @@ __device__ bool trace_ray(gpuRay ray)
 {
   for(size_t i = 0; i < numPrim; i++)
   {
-    if(primitives[i].intersect(ray,pos))
+    if(primitives[i].intersect(ray))
       return true;
   }
   return false;
@@ -111,7 +113,7 @@ void gpuPathTracer::load_scene()
   gpuTriangle* temp_tri = new gpuTriangle[num_tri];
   for(int i = 0; i < num_tri; i++)
   {
-    temp_tri[i] = gpuTriangle(cpu_mesh,
+    temp_tri[i] = gpuTriangle(cpu_mesh,pos_d,
         ((Triangle*)(pathtracer->bvh->primitives[i]))->v1,
         ((Triangle*)(pathtracer->bvh->primitives[i]))->v2,
         ((Triangle*)(pathtracer->bvh->primitives[i]))->v3);

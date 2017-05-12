@@ -24,13 +24,13 @@ bool BBox::intersect(const Ray& r, double& t0, double& t1) const {
   
   double ty1 = (min.y - r.o.y) / r.d.y;
   double ty2 = (max.y - r.o.y) / r.d.y;
-  double tymin = MIN(tx1, tx2);
-  double tymax = MAX(tx1, tx2);
+  double tymin = MIN(ty1, ty2);
+  double tymax = MAX(ty1, ty2);
 
   double tz1 = (min.z - r.o.z) / r.d.z; 
   double tz2 = (min.z - r.o.z) / r.d.z;
-  double tzmin = MIN(tx1, tx2);
-  double tzmax = MAX(tx1, tx2);
+  double tzmin = MIN(tz1, tz2);
+  double tzmax = MAX(tz1, tz2);
 
   double tmin = MAX(MAX(t0, txmin), MAX(tymin, tzmin));
   double tmax = MIN(MIN(t1, txmax), MIN(tymax, tzmax));
