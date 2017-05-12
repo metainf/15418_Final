@@ -1,6 +1,6 @@
 #ifndef GPU_MESH_H
 #define GPU_MESH_H
-#include "gpuVector3D.h"
+#include "gpuVector3D.cu"
 
 class gpuMesh {
   public:

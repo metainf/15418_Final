@@ -3,45 +3,49 @@ cmake_minimum_required(VERSION 2.8)
 # Application source
 set(APPLICATION_SOURCE
 
-    # Collada Parser
-    collada/collada.cpp
-    collada/camera_info.cpp
-    collada/light_info.cpp
-    collada/sphere_info.cpp
-    collada/polymesh_info.cpp
-    collada/material_info.cpp
+  # Collada Parser
+  collada/collada.cpp
+  collada/camera_info.cpp
+  collada/light_info.cpp
+  collada/sphere_info.cpp
+  collada/polymesh_info.cpp
+  collada/material_info.cpp
 
-    # Dynamic Scene
-    dynamic_scene/mesh.cpp
-    dynamic_scene/scene.cpp
-    dynamic_scene/sphere.cpp
+  # Dynamic Scene
+  dynamic_scene/mesh.cpp
+  dynamic_scene/scene.cpp
+  dynamic_scene/sphere.cpp
 
-    # Static scene
-    static_scene/sphere.cpp
-    static_scene/triangle.cpp
-    static_scene/object.cpp
-    static_scene/environment_light.cpp
-    static_scene/light.cpp
+  # Static scene
+  static_scene/sphere.cpp
+  static_scene/triangle.cpp
+  static_scene/object.cpp
+  static_scene/environment_light.cpp
+  static_scene/light.cpp
 
-    # MeshEdit
-    halfEdgeMesh.cpp
-    meshEdit.cpp
+  # MeshEdit
+  halfEdgeMesh.cpp
+  meshEdit.cpp
 
-    # PathTracer
-    bvh.cpp
-    bbox.cpp
-    bsdf.cpp
-    camera.cpp
-    sampler.cpp
-    pathtracer.cpp
+  # PathTracer
+  bvh.cpp
+  bbox.cpp
+  bsdf.cpp
+  camera.cpp
+  sampler.cpp
+  pathtracer.cpp
 
-    # misc
-    misc/sphere_drawing.cpp
+  # misc
+  misc/sphere_drawing.cpp
 
-    # Application
-    application.cpp
-    main.cpp
-)
+  # Application
+  application.cpp
+  main.cpp
+
+  cuda/hello.cu
+  cuda/test.cu
+  cuda/gpuPathtracer.cu
+  )
 
 #-------------------------------------------------------------------------------
 # Set include directories
@@ -51,7 +55,7 @@ include_directories(
   ${GLFW_INCLUDE_DIRS}
   ${CMU462_INCLUDE_DIRS}
   ${FREETYPE_INCLUDE_DIRS}
-)
+  )
 
 #-------------------------------------------------------------------------------
 # Set link directories
@@ -61,7 +65,7 @@ link_directories(
   ${GLFW_LIBRARY_DIRS}
   ${CMU462_LIBRARY_DIRS}
   ${FREETYPE_LIBRARY_DIRS}
-)
+  )
 #CUDA
 
 SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
@@ -73,20 +77,19 @@ set(
   --std=c++11
   )
 
-cuda_add_library(cuda_lib
-  cuda/hello.cu
-  cuda/test.cu
-  cuda/gpuTriangle.cu
-  cuda/gpuPathtracer.cu
-  cuda/gpuMatrix4x4.cu
-  cuda/gpuMatrix3x3.cu
-  cuda/gpuCamera.cu
-  cuda/gpuBvh.cu
-  )
+#cuda_add_library(cuda_lib
+#cuda/hello.cu
+  #cuda/test.cu
+  #cuda/gpuTriangle.cu
+  #cuda/gpuPathtracer.cu
+  #cuda/gpuMatrix4x4.cu
+  #cuda/gpuMatrix3x3.cu
+  #  cuda/gpuCamera.cu
+ #  )
 
-target_link_libraries( cuda_lib
-    CMU462 ${CMU462_LIBRARIES}
-)
+ # target_link_libraries( cuda_lib
+ #CMU462 ${CMU462_LIBRARIES}
+ # )
 
 #-------------------------------------------------------------------------------
 # Add executable
@@ -94,21 +97,21 @@ target_link_libraries( cuda_lib
 cuda_add_executable(pathtracer ${APPLICATION_SOURCE})
 
 target_link_libraries( pathtracer
-    CMU462 ${CMU462_LIBRARIES}
-    glew ${GLEW_LIBRARIES}
-    glfw ${GLFW_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${CMAKE_THREADS_INIT}
-    cuda_lib ${CUDA_LIBRARIES}
-)
+  CMU462 ${CMU462_LIBRARIES}
+  glew ${GLEW_LIBRARIES}
+  glfw ${GLFW_LIBRARIES}
+  ${OPENGL_LIBRARIES}
+  ${FREETYPE_LIBRARIES}
+  ${CMAKE_THREADS_INIT}
+  #cuda_lib ${CUDA_LIBRARIES}
+  )
 
 #-------------------------------------------------------------------------------
 # Platform-specific configurations for target
 #-------------------------------------------------------------------------------
 if(APPLE)
   set_property( TARGET pathtracer APPEND_STRING PROPERTY COMPILE_FLAGS
-                "-Wno-deprecated-declarations -Wno-c++11-extensions")
+    "-Wno-deprecated-declarations -Wno-c++11-extensions")
 endif(APPLE)
 
 # Put executable in build directory root

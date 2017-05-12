@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "hello.h"
-#include "gpuVector3D.h"
+#include "gpuVector3D.cu"
 #include "test.h"
 #include "CMU462/vector3D.h"
 
@@ -49,6 +49,7 @@ int main_test()
   dim3 dimBlock( blocksize, 1 );
   dim3 dimGrid( 1, 1 );
   hello<<<dimGrid, dimBlock>>>(ad, bd);
+  POSTKERNEL; 
   cudaMemcpy( a, ad, csize, cudaMemcpyDeviceToHost ); 
   cudaFree( ad );
   cudaFree( bd );

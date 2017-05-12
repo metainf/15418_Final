@@ -1,4 +1,33 @@
-#include "gpuTriangle.h"
+#include "gpuBBox.cu"
+#include "gpuVector3D.cu"
+#include "gpuRay.cu"
+#include "gpuMesh.cu"
+#include "../static_scene/object.h"
+
+using namespace CMU462;
+using namespace StaticScene;
+
+class gpuTriangle {
+  public:
+    __host__ gpuTriangle(){}
+
+    __host__ gpuTriangle(const Mesh* mesh_cpu, const gpuMesh* mesh, 
+        size_t v1, size_t v2, size_t v3);
+
+    __device__ gpuBBox get_bbox() const;
+
+    __device__ bool intersect(const gpuRay& r) const;
+
+    __device__ gpuVector3D get_center();
+  private:
+
+    const gpuMesh* mesh;
+    size_t v1;
+    size_t v2;
+    size_t v3;
+
+    gpuVector3D centroid;
+};
 
 __host__
 gpuTriangle::gpuTriangle(const Mesh* mesh_cpu, const gpuMesh* mesh,
@@ -52,6 +81,7 @@ bool gpuTriangle::intersect(const gpuRay& r) const {
   double t = -dot(sXe2, e1);
 
   gpuVector3D sol = 1/denom * gpuVector3D(u,v,t);
+  printf("%f\n",sol[2]);
 
   if(0 <= sol[0] && sol[0] < 1 && 
       0 <= sol[1] && sol[1] < 1 &&

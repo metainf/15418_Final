@@ -45,7 +45,6 @@ class gpuPathTracer{
 
     // Components //
     PathTracer * pathtracer;
-    bool* imagePixels;
     size_t w;
     size_t h;
 };

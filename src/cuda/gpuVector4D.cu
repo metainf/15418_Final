@@ -1,7 +1,7 @@
 #ifndef GPU_VECTOR4D_H
 #define GPU_VECTOR4D_H
 
-#include "gpuVector3D.h"
+#include "gpuVector3D.cu"
 
 /**
  * Defines 4D standard vectors.

@@ -1,7 +1,7 @@
 #ifndef GPU_RAY_H
 #define GPU_RAY_H
 #include "math_constants.h"
-#include "gpuVector3D.h"
+#include "gpuVector3D.cu"
 struct gpuRay {
   size_t depth;
 
