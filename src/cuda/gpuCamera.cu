@@ -10,7 +10,7 @@ class gpuCamera {
     
     __host__ gpuCamera(Matrix3x3 c2w, Vector3D p, size_t screenW, size_t screenH, double screenDist);
     
-    __device__ gpuRay generate_ray(double x, double y) const;
+    __device__ gpuRay generate_ray(double x, double y);
 
   private:
     gpuVector3D pos;
@@ -33,7 +33,7 @@ gpuCamera::gpuCamera(Matrix3x3 cameraToWorld, Vector3D p,
   }
 }
 
-__device__ gpuRay gpuCamera::generate_ray(double x, double y) const {
+__device__ gpuRay gpuCamera::generate_ray(double x, double y) {
   gpuVector3D sp_cam = gpuVector3D(-(x - 0.5) * screenW / screenDist,
                                    -(y - 0.5) * screenH / screenDist, 1);
   gpuVector3D dir_cam = -sp_cam;

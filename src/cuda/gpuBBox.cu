@@ -24,7 +24,7 @@ struct gpuBBox {
    * Creates a bounding box that includes a single point.
    */
   __device__ __host__
-    gpuBBox(const gpuVector3D& p) : min(p), max(p) { extent = max - min; }
+    gpuBBox(const gpuVector3D p) : min(p), max(p) { extent = max - min; }
 
   /**
    * Constructor.
@@ -33,7 +33,7 @@ struct gpuBBox {
    * \param max the max corner
    */
   __device__ __host__ 
-    gpuBBox(const gpuVector3D& min, const gpuVector3D& max) :
+    gpuBBox(const gpuVector3D min, const gpuVector3D max) :
     min(min), max(max) { extent = max - min; }
 
   /**
@@ -55,7 +55,7 @@ struct gpuBBox {
    * given input.
    * \param bbox the bounding box to be included
    */
-  __device__ void expand(const gpuBBox& bbox) {
+  __device__ void expand(const gpuBBox bbox) {
     min.x = fmin(min.x, bbox.min.x);
     min.y = fmin(min.y, bbox.min.y);
     min.z = fmin(min.z, bbox.min.z);
@@ -72,7 +72,7 @@ struct gpuBBox {
    * point.
    * \param p the point to be included
    */
-  __device__ void expand(const gpuVector3D& p) {
+  __device__ void expand(const gpuVector3D p) {
     min.x = fmin(min.x, p.x);
     min.y = fmin(min.y, p.y);
     min.z = fmin(min.z, p.z);
@@ -115,6 +115,6 @@ struct gpuBBox {
    * \param t0 lower bound of intersection time
    * \param t1 upper bound of intersection time
    */
- __device__ bool intersect(const gpuRay& r, double& t0, double& t1) const;
+ __device__ bool intersect(const gpuRay r, double t0, double t1) const;
 
 };

@@ -8,7 +8,7 @@ gpuBBox gpuBVHAccel::get_bbox() const {
 }
 
 __device__
-bool gpuBVHAccel::intersect(const gpuRay& ray) 
+bool gpuBVHAccel::intersect(const gpuRay ray) 
 { 
   bool hit = false;
   //create a stack

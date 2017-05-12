@@ -11,28 +11,26 @@ class gpuTriangle {
   public:
     __host__ gpuTriangle(){}
 
-    __host__ gpuTriangle(const Mesh* mesh_cpu, const gpuMesh* mesh, 
+    __host__ gpuTriangle(const Mesh* mesh_cpu, 
         size_t v1, size_t v2, size_t v3);
 
-    __device__ gpuBBox get_bbox() const;
+    __device__ gpuBBox get_bbox(gpuVector3D* pos);
 
-    __device__ bool intersect(const gpuRay& r) const;
+    __device__ bool intersect(gpuRay r,gpuVector3D* pos);
 
     __device__ gpuVector3D get_center();
-  private:
-
-    const gpuMesh* mesh;
+    
     size_t v1;
     size_t v2;
     size_t v3;
-
+  private:
     gpuVector3D centroid;
 };
 
 __host__
-gpuTriangle::gpuTriangle(const Mesh* mesh_cpu, const gpuMesh* mesh,
+gpuTriangle::gpuTriangle(const Mesh* mesh_cpu,
     size_t v1, size_t v2, size_t v3):
-  mesh(mesh), v1(v1), v2(v2), v3(v3){
+  v1(v1), v2(v2), v3(v3){
     Vector3D p1 = mesh_cpu->positions[v1];
     Vector3D p2 = mesh_cpu->positions[v2];
     Vector3D p3 = mesh_cpu->positions[v3];
@@ -42,13 +40,13 @@ gpuTriangle::gpuTriangle(const Mesh* mesh_cpu, const gpuMesh* mesh,
   }
 
 __device__
-gpuBBox gpuTriangle::get_bbox() const {
+gpuBBox gpuTriangle::get_bbox(gpuVector3D* pos){
 
   // TODO: 
   // compute the bounding box of the triangle
-  gpuVector3D p1 = mesh->positions[v1];
-  gpuVector3D p2 = mesh->positions[v2];
-  gpuVector3D p3 = mesh->positions[v3];
+  gpuVector3D p1 = pos[v1];
+  gpuVector3D p2 = pos[v2];
+  gpuVector3D p3 = pos[v3];
 
   gpuVector3D min = gpuVector3D(fmin(p1.x,fmin(p2.x,p3.x)),
       fmin(p1.y,fmin(p2.y,p3.y)),
@@ -61,21 +59,23 @@ gpuBBox gpuTriangle::get_bbox() const {
 }
 
 __device__
-bool gpuTriangle::intersect(const gpuRay& r) const {
+bool gpuTriangle::intersect(gpuRay r, gpuVector3D* pos){
 
   // TODO: implement ray-triangle intersection
-  gpuVector3D e1 = mesh->positions[v2] - mesh->positions[v1];
-  gpuVector3D e2 = mesh->positions[v3] - mesh->positions[v1];
-  gpuVector3D s = r.o - mesh->positions[v1];
+  gpuVector3D e1 = pos[v2] - pos[v1];
+  gpuVector3D e2 = pos[v3] - pos[v1];
+  gpuVector3D s = r.o - pos[v1];
 
   gpuVector3D e1Xd = cross(e1,r.d);
   gpuVector3D sXe2 = cross(s,e2);
 
-  double denom = dot(e1Xd, e2);
+  double denom = s.x;//dot(e1Xd, e2);
 
-  if(denom == 0)
+  if(denom == 0.0) {
     return false;
+  }
 
+  return true;
   double u = -dot(sXe2, r.d);
   double v = dot(e1Xd, s);
   double t = -dot(sXe2, e1);

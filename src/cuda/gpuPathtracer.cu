@@ -24,25 +24,25 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
 using namespace CMU462;
 using namespace StaticScene;
 
-__constant__ gpuMesh* mesh;
 __constant__ gpuTriangle* primitives;
 __constant__ gpuCamera* camera_const;
 __constant__ bool* imagePixels_const;
 __constant__ size_t w_d;
 __constant__ size_t h_d;
 __constant__ size_t numPrim;
+__constant__ gpuVector3D* pos;
 
 bool* imagePixels;
 gpuCamera* camera;
 gpuTriangle* gpu_primitives;
-gpuMesh *gpu_mesh;
+gpuVector3D *pos_d;
 
 // returns the result of ray tracing intersection with the scene primitives
-__device__ bool trace_ray(const gpuRay& ray)
+__device__ bool trace_ray(gpuRay ray)
 {
   for(size_t i = 0; i < numPrim; i++)
   {
-    if(primitives[i].intersect(ray))
+    if(primitives[i].intersect(ray,pos))
       return true;
   }
   return false;
@@ -61,10 +61,10 @@ __global__ void render()
   size_t index = blockIdx.x * blockDim.x + threadIdx.x;
   size_t x = index % w_d;
   size_t y = index / w_d;
-  printf("%u\n", index);
+  //printf("%u\n", index);
   if(x < w_d && y < h_d)
   {
-    imagePixels_const[index] = true;//raytrace_pixel(x,y);
+    imagePixels_const[index] = raytrace_pixel(x,y);
   }
 }
 
@@ -72,14 +72,13 @@ __global__ void render()
 gpuPathTracer::gpuPathTracer(PathTracer *__pathtracer)
 {
   pathtracer = __pathtracer;
-  cudaSetDevice(1);
 }
 
 gpuPathTracer::~gpuPathTracer() {
   cudaFree(camera);
   cudaFree(imagePixels);
   cudaFree(gpu_primitives);
-  cudaFree(gpu_mesh);
+  cudaFree(pos_d);
 }
 
 void gpuPathTracer::load_scene()
@@ -90,39 +89,36 @@ void gpuPathTracer::load_scene()
 
   const Mesh* cpu_mesh = ((Triangle*)(pathtracer->bvh->primitives[0]))->mesh;
   size_t numVerts = cpu_mesh->numVerts;
+  printf("numVerts: %d\n",numVerts);
 
+  gpuVector3D* pos_temp = new gpuVector3D[numVerts];
+  
+  for(size_t i = 0; i < numVerts; i++)
+  {
+    pos_temp[i] = gpuVector3D(cpu_mesh->positions[i].x,
+        cpu_mesh->positions[i].y,
+        cpu_mesh->positions[i].z);
+  }
   // Copy over the vertices and normals of the mesh
-  gpuVector3D *pos_d;
-  gpuVector3D *norm_d;
 
   cudaMalloc((void**)&pos_d,sizeof(gpuVector3D) * numVerts);
-  cudaMalloc((void**)&norm_d,sizeof(gpuVector3D) * numVerts);
 
-  cudaMemcpy(pos_d, cpu_mesh->positions, sizeof(gpuVector3D) * numVerts,
-        cudaMemcpyHostToDevice);
-  cudaMemcpy(norm_d, cpu_mesh->normals, sizeof(gpuVector3D) * numVerts,
-        cudaMemcpyHostToDevice);
-
-  // Group the mesh info into a gpuMesh
-  gpuMesh gpu_mesh_tmp(pos_d,norm_d);
-
-  cudaMalloc((void**)&gpu_mesh,sizeof(gpuMesh));
-
-  cudaMemcpy(gpu_mesh,&gpu_mesh_tmp, sizeof(gpuMesh),cudaMemcpyHostToDevice);
-  cudaMemcpyToSymbol(mesh,&gpu_mesh,sizeof(gpuMesh*));
+  cudaMemcpy(pos_d, pos_temp, sizeof(gpuVector3D) * numVerts,
+      cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(pos,&pos_d,sizeof(gpuVector3D*));
 
   // Copy over the triangles
   gpuTriangle* temp_tri = new gpuTriangle[num_tri];
   for(int i = 0; i < num_tri; i++)
   {
-    temp_tri[i] = gpuTriangle(cpu_mesh,gpu_mesh,
+    temp_tri[i] = gpuTriangle(cpu_mesh,
         ((Triangle*)(pathtracer->bvh->primitives[i]))->v1,
         ((Triangle*)(pathtracer->bvh->primitives[i]))->v2,
         ((Triangle*)(pathtracer->bvh->primitives[i]))->v3);
   }
   cudaMalloc((void**)&gpu_primitives,sizeof(gpuTriangle) * num_tri);
   cudaMemcpy(gpu_primitives,temp_tri,sizeof(gpuTriangle) * num_tri,
-        cudaMemcpyHostToDevice);
+      cudaMemcpyHostToDevice);
   cudaMemcpyToSymbol(primitives,&gpu_primitives,sizeof(gpuTriangle*));
 
   printf("[GPU Pathtracer]: finished loading scene\n");
@@ -158,7 +154,7 @@ void gpuPathTracer::update_screen()
 
   bool *tmp = new bool[w * h];
   cudaMemcpy(tmp, imagePixels, w * h * sizeof(bool),
-        cudaMemcpyDeviceToHost);
+      cudaMemcpyDeviceToHost);
   //copy imagePixels into pathtracer->frameBuffer
   for(size_t i = 0; i < h; i++) {
     for(size_t j = 0; j < w; j++) {
@@ -178,7 +174,7 @@ void gpuPathTracer::update_screen()
 void gpuPathTracer::start_raytrace()
 {
   size_t numBlocks = (w * h + 31 -1)/32;
-  render<<<32,32>>>();
+  render<<<numBlocks,32>>>();
   cudaDeviceSynchronize();
   printf("[GPU Pathtracer]: finished rendering scene\n");
 }
