@@ -27,30 +27,30 @@ using namespace StaticScene;
 
 __constant__ gpuTriangle* primitives;
 //__constant__ gpuCamera* camera_const;
-__constant__ bool* imagePixels_const;
+__constant__ int* imagePixels_const;
 __constant__ size_t w_d;
 __constant__ size_t h_d;
 __constant__ size_t numPrim;
 __constant__ gpuVector3D* pos;
 
-bool* imagePixels;
+int* imagePixels;
 gpuCamera* camera;
 gpuTriangle* gpu_primitives;
 gpuVector3D *pos_d;
 
 // returns the result of ray tracing intersection with the scene primitives
-__device__ bool trace_ray(gpuRay ray)
+__device__ int trace_ray(gpuRay ray)
 {
   for(size_t i = 0; i < numPrim; i++)
   {
     if(primitives[i].intersect(ray))
-      return true;
+      return 1;
   }
-  return false;
+  return 0;
 }
 
 // Using the x and y position of the pixel, create a ray and use trace_ray
-__device__ bool raytrace_pixel(size_t x, size_t y,gpuCamera* cam)
+__device__ int raytrace_pixel(size_t x, size_t y,gpuCamera* cam)
 {
   gpuVector3D p((x + 0.5)/w_d,(y + 0.5)/h_d,0);
   return trace_ray(cam->generate_ray(p.x,p.y));
@@ -153,18 +153,18 @@ void gpuPathTracer::set_frame_size(size_t width, size_t height)
   cudaMemcpyToSymbol(h_d,&h,sizeof(size_t));
 
   // reallocate the imagePixels buffer
-  cudaMalloc((void**)&imagePixels,sizeof(bool) * w * h);
-  cudaMemcpyToSymbol(imagePixels_const,&imagePixels,sizeof(bool*));
+  cudaMalloc((void**)&imagePixels,sizeof(int) * w * h);
+  cudaMemcpyToSymbol(imagePixels_const,&imagePixels,sizeof(int*));
 }
 
-// Takes the bool imagePixels and draws it on the screen as b/w pixels
+// Takes the int imagePixels and draws it on the screen as b/w pixels
 void gpuPathTracer::update_screen()
 {
   Color white(1, 1, 1, 1);
   Color black(0, 0, 0, 0);
 
-  bool *tmp = new bool[w * h];
-  cudaMemcpy(tmp, imagePixels, w * h * sizeof(bool),
+  int *tmp = new int[w * h];
+  cudaMemcpy(tmp, imagePixels, w * h * sizeof(int),
       cudaMemcpyDeviceToHost);
   //copy imagePixels into pathtracer->frameBuffer
   for(size_t i = 0; i < h; i++) {

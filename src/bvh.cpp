@@ -305,13 +305,13 @@ namespace CMU462 { namespace StaticScene {
     // and not the BVH aggregate itself.
 
     /* naive implementation 
-     *
+     */
      bool hit = false;
      for (size_t p = 0; p < primitives.size(); ++p) {
      if(primitives[p]->intersect(ray, i)) hit = true;
      }
      return hit;
-     */
+    /*/
 
     bool hit = false;
     //create a stack
@@ -372,6 +372,7 @@ namespace CMU462 { namespace StaticScene {
       }
     }
     return hit;
+    */
   }
 
 }  // namespace StaticScene
