@@ -10,7 +10,7 @@ class gpuVector4D {
   public:
 
   // components
-  double x, y, z, w;
+  float x, y, z, w;
 
   /**
    * Constructor.
@@ -24,14 +24,14 @@ class gpuVector4D {
    * Initializes to vector (x,y,z,w).
    */
   __device__ __host__
-  gpuVector4D( double x, double y, double z, double w) : x( x ), y( y ), z( z ), w( w ) { }
+  gpuVector4D( float x, float y, float z, float w) : x( x ), y( y ), z( z ), w( w ) { }
 
   /**
    * Constructor.
    * Initializes to vector (x,y,z,0).
    */
   __device__ __host__
-  gpuVector4D( double x, double y, double z) : x( x ), y( y ), z( z ), w( 0.0 ) { }
+  gpuVector4D( float x, float y, float z) : x( x ), y( y ), z( z ), w( 0.0 ) { }
 
 
   /**
@@ -39,7 +39,7 @@ class gpuVector4D {
    * Initializes to vector (c,c,c,c)
    */
   __device__ __host__
-  gpuVector4D( double c ) : x( c ), y( c ), z( c ), w ( c ) { }
+  gpuVector4D( float c ) : x( c ), y( c ), z( c ), w ( c ) { }
 
   /**
    * Constructor.
@@ -60,17 +60,17 @@ class gpuVector4D {
    * Initializes from existing vector3D and w value.
    */
   __device__ __host__
-  gpuVector4D( const gpuVector3D& v, double w ) : x( v.x ), y( v.y ), z( v.z ), w( w ) { }
+  gpuVector4D( const gpuVector3D& v, float w ) : x( v.x ), y( v.y ), z( v.z ), w( w ) { }
 
   // returns reference to the specified component (0-based indexing: x, y, z)
   __device__
-  inline double& operator[] ( const int& index ) {
+  inline float& operator[] ( const int& index ) {
     return ( &x )[ index ];
   }
 
   // returns const reference to the specified component (0-based indexing: x, y, z)
   __device__
-  inline const double& operator[] ( const int& index ) const {
+  inline const float& operator[] ( const int& index ) const {
     return ( &x )[ index ];
   }
 
@@ -94,14 +94,14 @@ class gpuVector4D {
 
   // right scalar multiplication
   __device__
-  inline gpuVector4D operator*( const double& c ) const {
+  inline gpuVector4D operator*( const float& c ) const {
     return gpuVector4D( x * c, y * c, z * c, w * c );
   }
 
   // scalar division
   __device__
-  inline gpuVector4D operator/( const double& c ) const {
-    const double rc = 1.0/c;
+  inline gpuVector4D operator/( const float& c ) const {
+    const float rc = 1.0/c;
     return gpuVector4D( rc * x, rc * y, rc * z, rc * w );
   }
 
@@ -119,13 +119,13 @@ class gpuVector4D {
 
   // scalar multiplication / assignment
   __device__
-  inline void operator*=( const double& c ) {
+  inline void operator*=( const float& c ) {
     x *= c; y *= c; z *= c; w *= c;
   }
 
   // scalar division / assignment
   __device__
-  inline void operator/=( const double& c ) {
+  inline void operator/=( const float& c ) {
     (*this) *= ( 1./c );
   }
 
@@ -133,7 +133,7 @@ class gpuVector4D {
    * Returns Euclidean distance metric extended to 4 dimensions.
    */
   __device__
-  inline double norm( void ) const {
+  inline float norm( void ) const {
     return sqrt( x*x + y*y + z*z + w*w );
   }
 
@@ -141,7 +141,7 @@ class gpuVector4D {
    * Returns Euclidean length squared.
    */
   __device__
-  inline double norm2( void ) const {
+  inline float norm2( void ) const {
     return x*x + y*y + z*z + w*w;
   }
 
@@ -150,7 +150,7 @@ class gpuVector4D {
    */
   __device__
   inline gpuVector4D unit( void ) const {
-    double rNorm = 1. / sqrt( x*x + y*y + z*z + w*w);
+    float rNorm = 1. / sqrt( x*x + y*y + z*z + w*w);
     return gpuVector4D( rNorm*x, rNorm*y, rNorm*z );
   }
 
@@ -175,7 +175,7 @@ class gpuVector4D {
    */
   __device__
   inline gpuVector3D projectTo3D( void ) {
-    double invW = 1.0 / w;
+    float invW = 1.0 / w;
     return gpuVector3D(x * invW, y * invW, z * invW);
   }
 
@@ -183,13 +183,13 @@ class gpuVector4D {
 
 // left scalar multiplication
 __device__
-inline gpuVector4D operator* ( const double& c, const gpuVector4D& v ) {
+inline gpuVector4D operator* ( const float& c, const gpuVector4D& v ) {
   return gpuVector4D( c * v.x, c * v.y, c * v.z, c*v.w );
 }
 
 // dot product (a.k.a. inner or scalar product)
 __device__
-inline double dot( const gpuVector4D& u, const gpuVector4D& v ) {
+inline float dot( const gpuVector4D& u, const gpuVector4D& v ) {
   return u.x*v.x + u.y*v.y + u.z*v.z + u.w*v.w;;
 }
 

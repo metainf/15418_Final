@@ -3,22 +3,22 @@
 
 class gpuVector3D {
   public:
-    double x,y,z;
+    float x,y,z;
 
     __device__ __host__ gpuVector3D(): x(0.0), y(0.0), z(0.0){}
 
     __device__ __host__ 
-      gpuVector3D(double x, double y, double z): x(x), y(y), z(z){}
+      gpuVector3D(float x, float y, float z): x(x), y(y), z(z){}
 
-    __device__ __host__ gpuVector3D(double c): x(c), y(c), z(c){}
+    __device__ __host__ gpuVector3D(float c): x(c), y(c), z(c){}
 
     // returns reference to the specified component (0-based indexing: x, y, z)
-    __device__ __host__ inline double& operator[] ( const int& index ) {
+    __device__ __host__ inline float& operator[] ( const int& index ) {
       return ( &x )[ index ];
     }
 
     // returns const reference to the specified component (0-based indexing: x, y, z)
-    __device__ __host__ inline const double& operator[] ( const int& index ) const {
+    __device__ __host__ inline const float& operator[] ( const int& index ) const {
       return ( &x )[ index ];
     }
     __device__ inline bool operator==( const gpuVector3D& v) const {
@@ -41,13 +41,13 @@ class gpuVector3D {
     }
 
     // right scalar multiplication
-    __device__ inline gpuVector3D operator*( const double& c ) const {
+    __device__ inline gpuVector3D operator*( const float& c ) const {
       return gpuVector3D( x * c, y * c, z * c );
     }
 
     // scalar division
-    __device__ __host__ inline gpuVector3D operator/( const double& c ) const {
-      const double rc = 1.0/c;
+    __device__ __host__ inline gpuVector3D operator/( const float& c ) const {
+      const float rc = 1.0/c;
       return gpuVector3D( rc * x, rc * y, rc * z );
     }
 
@@ -62,26 +62,26 @@ class gpuVector3D {
     }
 
     // scalar multiplication / assignment
-    __device__ inline void operator*=( const double& c ) {
+    __device__ inline void operator*=( const float& c ) {
       x *= c; y *= c; z *= c;
     }
 
     // scalar division / assignment
-    __device__ inline void operator/=( const double& c ) {
+    __device__ inline void operator/=( const float& c ) {
       (*this) *= ( 1./c );
     }
 
     /**
      * Returns Euclidean length.
      */
-    __device__ inline double norm( void ) const {
+    __device__ inline float norm( void ) const {
       return norm3d( x*x, y*y, z*z );
     }
 
     /**
      * Returns Euclidean length squared.
      */
-    __device__ inline double norm2( void ) const {
+    __device__ inline float norm2( void ) const {
       return x*x + y*y + z*z;
     }
 
@@ -89,7 +89,7 @@ class gpuVector3D {
      * Returns unit vector.
      */
     __device__ inline gpuVector3D unit( void ) const {
-      double rNorm = 1. / norm3d( x*x, y*y, z*z );
+      float rNorm = 1. / norm3d( x*x, y*y, z*z );
       return gpuVector3D( rNorm*x, rNorm*y, rNorm*z );
     }
 
@@ -103,12 +103,12 @@ class gpuVector3D {
 }; // class gpuVector3D
 
 // left scalar multiplication
-__device__ inline gpuVector3D operator* ( const double& c, const gpuVector3D& v ) {
+__device__ inline gpuVector3D operator* ( const float& c, const gpuVector3D& v ) {
   return gpuVector3D( c * v.x, c * v.y, c * v.z );
 }
 
 // dot product (a.k.a. inner or scalar product)
-__device__ inline double dot( const gpuVector3D& u, const gpuVector3D& v ) {
+__device__ inline float dot( const gpuVector3D& u, const gpuVector3D& v ) {
   return u.x*v.x + u.y*v.y + u.z*v.z ;
 }
 

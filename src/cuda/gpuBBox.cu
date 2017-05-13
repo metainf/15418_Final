@@ -48,8 +48,8 @@ struct gpuBBox {
    * Creates a bounding box with given bounds (component wise).
    */
   __device__ __host__
-    gpuBBox(const double minX, const double minY, const double minZ,
-      const double maxX, const double maxY, const double maxZ) {
+    gpuBBox(const float minX, const float minY, const float minZ,
+      const float maxX, const float maxY, const float maxZ) {
     min = gpuVector3D(minX, minY, minZ);
     max = gpuVector3D(maxX, maxY, maxZ);
     extent = max - min;
@@ -70,12 +70,12 @@ struct gpuBBox {
    * \param bbox the bounding box to be included
    */
   __device__ void expand(const gpuBBox bbox) {
-    min.x = fmin(min.x, bbox.min.x);
-    min.y = fmin(min.y, bbox.min.y);
-    min.z = fmin(min.z, bbox.min.z);
-    max.x = fmax(max.x, bbox.max.x);
-    max.y = fmax(max.y, bbox.max.y);
-    max.z = fmax(max.z, bbox.max.z);
+    min.x = fminf(min.x, bbox.min.x);
+    min.y = fminf(min.y, bbox.min.y);
+    min.z = fminf(min.z, bbox.min.z);
+    max.x = fmaxf(max.x, bbox.max.x);
+    max.y = fmaxf(max.y, bbox.max.y);
+    max.z = fmaxf(max.z, bbox.max.z);
     extent = max - min;
   }
 
@@ -87,12 +87,12 @@ struct gpuBBox {
    * \param p the point to be included
    */
   __device__ void expand(const gpuVector3D p) {
-    min.x = fmin(min.x, p.x);
-    min.y = fmin(min.y, p.y);
-    min.z = fmin(min.z, p.z);
-    max.x = fmax(max.x, p.x);
-    max.y = fmax(max.y, p.y);
-    max.z = fmax(max.z, p.z);
+    min.x = fminf(min.x, p.x);
+    min.y = fminf(min.y, p.y);
+    min.z = fminf(min.z, p.z);
+    max.x = fmaxf(max.x, p.x);
+    max.y = fmaxf(max.y, p.y);
+    max.z = fmaxf(max.z, p.z);
     extent = max - min;
   }
 
@@ -104,7 +104,7 @@ struct gpuBBox {
    * Compute the surface area of the bounding box.
    * \return surface area of the bounding box.
    */
-  __device__ double surface_area() const {
+  __device__ float surface_area() const {
     if (empty()) return 0.0;
     return 2 * (extent.x * extent.z +
         extent.x * extent.y +
@@ -129,24 +129,24 @@ struct gpuBBox {
    * \param t0 lower bound of intersection time
    * \param t1 upper bound of intersection time
    */
- __device__ bool intersect(const gpuRay r, double t0, double t1) const {
-  double tx1 = (min.x - r.o.x) / r.d.x;
-  double tx2 = (max.x - r.o.x) / r.d.x;
-  double txmin = MIN(tx1, tx2);
-  double txmax = MAX(tx1, tx2);
+ __device__ bool intersect(const gpuRay r, float t0, float t1) const {
+  float tx1 = (min.x - r.o.x) / r.d.x;
+  float tx2 = (max.x - r.o.x) / r.d.x;
+  float txmin = MIN(tx1, tx2);
+  float txmax = MAX(tx1, tx2);
   
-  double ty1 = (min.y - r.o.y) / r.d.y;
-  double ty2 = (max.y - r.o.y) / r.d.y;
-  double tymin = MIN(ty1, ty2);
-  double tymax = MAX(ty1, ty2);
+  float ty1 = (min.y - r.o.y) / r.d.y;
+  float ty2 = (max.y - r.o.y) / r.d.y;
+  float tymin = MIN(ty1, ty2);
+  float tymax = MAX(ty1, ty2);
 
-  double tz1 = (min.z - r.o.z) / r.d.z; 
-  double tz2 = (min.z - r.o.z) / r.d.z;
-  double tzmin = MIN(tz1, tz2);
-  double tzmax = MAX(tz1, tz2);
+  float tz1 = (min.z - r.o.z) / r.d.z; 
+  float tz2 = (min.z - r.o.z) / r.d.z;
+  float tzmin = MIN(tz1, tz2);
+  float tzmax = MAX(tz1, tz2);
 
-  double tmin = MAX(MAX(t0, txmin), MAX(tymin, tzmin));
-  double tmax = MIN(MIN(t1, txmax), MIN(tymax, tzmax));
+  float tmin = MAX(MAX(t0, txmin), MAX(tymin, tzmin));
+  float tmax = MIN(MIN(t1, txmax), MIN(tymax, tzmax));
 
   if(tmin <= tmax && tmax >= 0) {
     t1 = tmax;

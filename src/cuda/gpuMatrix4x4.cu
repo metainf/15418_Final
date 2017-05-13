@@ -13,7 +13,7 @@ class gpuMatrix4x4 {
     // Constructor for row major form data.
     // Transposes to the internal column major form.
     // REQUIRES: data should be of size 16.
-    __device__ __host__ gpuMatrix4x4(double * data)
+    __device__ __host__ gpuMatrix4x4(float * data)
     {
       for( int i = 0; i < 4; i++ )
         for( int j = 0; j < 4; j++ )
@@ -28,17 +28,17 @@ class gpuMatrix4x4 {
     /**
      * Sets all elements to val.
      */
-    __device__ void zero(double val = 0.0);
+    __device__ void zero(float val = 0.0);
 
     /**
      * Returns the determinant of A.
      */
-    __device__ double det( void ) const;
+    __device__ float det( void ) const;
 
     /**
      * Returns the Frobenius norm of A.
      */
-    __device__ double norm( void ) const;
+    __device__ float norm( void ) const;
 
     /**
      * Returns a fresh 4x4 identity matrix.
@@ -65,8 +65,8 @@ class gpuMatrix4x4 {
 
     // accesses element (i,j) of A using 0-based indexing
     // where (i, j) is (row, column).
-    __device__ __host__      double& operator()( int i, int j );
-    __device__ __host__ const double& operator()( int i, int j ) const;
+    __device__ __host__      float& operator()( int i, int j );
+    __device__ __host__ const float& operator()( int i, int j ) const;
 
     // accesses the ith column of A
     __device__ __host__    gpuVector4D& operator[]( int i );
@@ -82,7 +82,7 @@ class gpuMatrix4x4 {
     __device__ gpuMatrix4x4 operator-( const gpuMatrix4x4& B ) const;
 
     // returns c*A
-    __device__ gpuMatrix4x4 operator*( double c ) const;
+    __device__ gpuMatrix4x4 operator*( float c ) const;
 
     // returns A*B
     __device__ gpuMatrix4x4 operator*( const gpuMatrix4x4& B ) const;
@@ -91,7 +91,7 @@ class gpuMatrix4x4 {
       gpuVector4D operator*( const gpuVector4D& x ) const;
 
     // divides each element by x
-    __device__ void operator/=( double x );
+    __device__ void operator/=( float x );
 
   protected:
 
@@ -104,10 +104,10 @@ class gpuMatrix4x4 {
 __device__ gpuMatrix4x4 outer( const gpuVector4D& u, const gpuVector4D& v );
 
 // returns c*A
-__device__ gpuMatrix4x4 operator*( double c, const gpuMatrix4x4& A );
+__device__ gpuMatrix4x4 operator*( float c, const gpuMatrix4x4& A );
 
 __device__
-void gpuMatrix4x4::zero( double val ) {
+void gpuMatrix4x4::zero( float val ) {
   // sets all elements to val
   entries[0] =
     entries[1] =
@@ -116,7 +116,7 @@ void gpuMatrix4x4::zero( double val ) {
 }
 
 __device__
-double gpuMatrix4x4::det( void ) const {
+float gpuMatrix4x4::det( void ) const {
   const gpuMatrix4x4& A( *this );
 
   return
@@ -136,7 +136,7 @@ double gpuMatrix4x4::det( void ) const {
 }
 
 __device__
-double gpuMatrix4x4::norm( void ) const {
+float gpuMatrix4x4::norm( void ) const {
   return sqrt( entries[0].norm2() +
       entries[1].norm2() +
       entries[2].norm2() +
@@ -162,10 +162,10 @@ __device__
 void gpuMatrix4x4::operator+=( const gpuMatrix4x4& B ) {
 
   gpuMatrix4x4& A( *this );
-  double* Aij = (double*) &A;
-  const double* Bij = (const double*) &B;
+  float* Aij = (float*) &A;
+  const float* Bij = (const float*) &B;
 
-  // Add the 16 contigous vector packed double values.
+  // Add the 16 contigous vector packed float values.
   *Aij++ += *Bij++;//0
   *Aij++ += *Bij++;
   *Aij++ += *Bij++;
@@ -201,7 +201,7 @@ gpuMatrix4x4 gpuMatrix4x4::operator-( const gpuMatrix4x4& B ) const {
 }
 
 __device__
-gpuMatrix4x4 gpuMatrix4x4::operator*( double c ) const {
+gpuMatrix4x4 gpuMatrix4x4::operator*( float c ) const {
   const gpuMatrix4x4& A( *this );
   gpuMatrix4x4 B;
 
@@ -216,11 +216,11 @@ gpuMatrix4x4 gpuMatrix4x4::operator*( double c ) const {
 
 // Returns c*A.
 __device__
-gpuMatrix4x4 operator*( double c, const gpuMatrix4x4& A ) {
+gpuMatrix4x4 operator*( float c, const gpuMatrix4x4& A ) {
 
   gpuMatrix4x4 cA;
-  const double* Aij = (const double*) &A;
-  double* cAij = (double*) &cA;
+  const float* Aij = (const float*) &A;
+  float* cAij = (float*) &cA;
 
   *cAij++ = c * (*Aij++);//0
   *cAij++ = c * (*Aij++);
@@ -317,9 +317,9 @@ gpuMatrix4x4 gpuMatrix4x4::inv( void ) const {
 }
 
 __device__
-void gpuMatrix4x4::operator/=( double x ) {
+void gpuMatrix4x4::operator/=( float x ) {
   gpuMatrix4x4& A( *this );
-  double rx = 1./x;
+  float rx = 1./x;
 
   for( int i = 0; i < 4; i++ )
     for( int j = 0; j < 4; j++ )

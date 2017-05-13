@@ -11,7 +11,7 @@ class gpuMatrix3x3 {
   // Transposes to the internal column major form.
   // REQUIRES: data should be of size 9 for a 3 by 3 matrix..
   __device__ __host__
-  gpuMatrix3x3(double * data)
+  gpuMatrix3x3(float * data)
   {
     for( int i = 0; i < 3; i++ ) {
       for( int j = 0; j < 3; j++ ) {
@@ -25,19 +25,19 @@ class gpuMatrix3x3 {
    * Sets all elements to val.
    */
   __device__
-  void zero(double val = 0.0 );
+  void zero(float val = 0.0 );
 
   /**
    * Returns the determinant of A.
    */
   __device__
-  double det( void ) const;
+  float det( void ) const;
 
   /**
    * Returns the Frobenius norm of A.
    */
   __device__
-  double norm( void ) const;
+  float norm( void ) const;
 
   /**
    * Returns the 3x3 identity matrix.
@@ -73,9 +73,9 @@ class gpuMatrix3x3 {
 
   // accesses element (i,j) of A using 0-based indexing
   __device__ __host__
-        double& operator()( int i, int j );
+        float& operator()( int i, int j );
   __device__ __host__
-  const double& operator()( int i, int j ) const;
+  const float& operator()( int i, int j ) const;
 
   // accesses the ith column of A
   __device__ __host__
@@ -97,7 +97,7 @@ class gpuMatrix3x3 {
 
   // returns c*A
   __device__
-  gpuMatrix3x3 operator*( double c ) const;
+  gpuMatrix3x3 operator*( float c ) const;
 
   // returns A*B
   __device__
@@ -109,7 +109,7 @@ class gpuMatrix3x3 {
 
   // divides each element by x
   __device__
-  void operator/=( double x );
+  void operator/=( float x );
 
   protected:
 
@@ -124,12 +124,12 @@ gpuMatrix3x3 outer( const gpuVector3D& u, const gpuVector3D& v );
 
 // returns c*A
 __device__
-gpuMatrix3x3 operator*( double c, const gpuMatrix3x3& A );
-__device__ __host__ double& gpuMatrix3x3::operator()( int i, int j ) {
+gpuMatrix3x3 operator*( float c, const gpuMatrix3x3& A );
+__device__ __host__ float& gpuMatrix3x3::operator()( int i, int j ) {
   return entries[j][i];
 }
 
-__device__ __host__ const double& gpuMatrix3x3::operator()( int i, int j ) const {
+__device__ __host__ const float& gpuMatrix3x3::operator()( int i, int j ) const {
   return entries[j][i];
 }
 
@@ -141,12 +141,12 @@ __device__ __host__ const gpuVector3D& gpuMatrix3x3::operator[]( int j ) const {
   return entries[j];
 }
 
-__device__ void gpuMatrix3x3::zero( double val ) {
+__device__ void gpuMatrix3x3::zero( float val ) {
   // sets all elements to val
   entries[0] = entries[1] = entries[2] = gpuVector3D( val, val, val );
 }
 
-__device__ double gpuMatrix3x3::det( void ) const {
+__device__ float gpuMatrix3x3::det( void ) const {
   const gpuMatrix3x3& A( *this );
 
   return -A(0,2)*A(1,1)*A(2,0) + A(0,1)*A(1,2)*A(2,0) +
@@ -154,7 +154,7 @@ __device__ double gpuMatrix3x3::det( void ) const {
           A(0,1)*A(1,0)*A(2,2) + A(0,0)*A(1,1)*A(2,2) ;
 }
 
-__device__ double gpuMatrix3x3::norm( void ) const {
+__device__ float gpuMatrix3x3::norm( void ) const {
   return sqrt( entries[0].norm2() +
                entries[1].norm2() +
                entries[2].norm2() );
@@ -176,8 +176,8 @@ __device__ gpuMatrix3x3 gpuMatrix3x3::operator-( void ) const {
 __device__ void gpuMatrix3x3::operator+=( const gpuMatrix3x3& B ) {
 
   gpuMatrix3x3& A( *this );
-  double* Aij = (double*) &A;
-  const double* Bij = (const double*) &B;
+  float* Aij = (float*) &A;
+  const float* Bij = (const float*) &B;
 
   *Aij++ += *Bij++;
   *Aij++ += *Bij++;
@@ -203,7 +203,7 @@ __device__ gpuMatrix3x3 gpuMatrix3x3::operator-( const gpuMatrix3x3& B ) const {
   return C;
 }
 
-__device__ gpuMatrix3x3 gpuMatrix3x3::operator*( double c ) const {
+__device__ gpuMatrix3x3 gpuMatrix3x3::operator*( float c ) const {
   const gpuMatrix3x3& A( *this );
   gpuMatrix3x3 B;
 
@@ -216,11 +216,11 @@ __device__ gpuMatrix3x3 gpuMatrix3x3::operator*( double c ) const {
   return B;
 }
 
-__device__ gpuMatrix3x3 operator*( double c, const gpuMatrix3x3& A ) {
+__device__ gpuMatrix3x3 operator*( float c, const gpuMatrix3x3& A ) {
 
   gpuMatrix3x3 cA;
-  const double* Aij = (const double*) &A;
-  double* cAij = (double*) &cA;
+  const float* Aij = (const float*) &A;
+  float* cAij = (float*) &cA;
 
   *cAij++ = c * (*Aij++);
   *cAij++ = c * (*Aij++);
@@ -285,9 +285,9 @@ __device__ gpuMatrix3x3 gpuMatrix3x3::inv( void ) const {
   return B;
 }
 
-__device__ void gpuMatrix3x3::operator/=( double x ) {
+__device__ void gpuMatrix3x3::operator/=( float x ) {
   gpuMatrix3x3& A( *this );
-  double rx = 1./x;
+  float rx = 1./x;
 
   for( int i = 0; i < 3; i++ )
   for( int j = 0; j < 3; j++ )
@@ -318,7 +318,7 @@ __device__ gpuMatrix3x3 gpuMatrix3x3::crossProduct( const gpuVector3D& u ) {
 
 __device__ gpuMatrix3x3 outer( const gpuVector3D& u, const gpuVector3D& v ) {
   gpuMatrix3x3 B;
-  double* Bij = (double*) &B;
+  float* Bij = (float*) &B;
 
   *Bij++ = u.x*v.x;
   *Bij++ = u.y*v.x;

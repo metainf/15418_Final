@@ -2,7 +2,6 @@
 #include "../static_scene/triangle.h"
 #include "../static_scene/object.h"
 #include "gpuRay.cu"
-#include "gpuMesh.cu"
 #include "gpuTriangle.cu"
 #include "gpuVector3D.cu"
 #include "gpuCamera.cu"
@@ -86,43 +85,48 @@ gpuPathTracer::~gpuPathTracer() {
 void gpuPathTracer::load_scene()
 {
   timer.start();
+
   // using the CPU's bvh, load the mesh information
   size_t num_tri = pathtracer->bvh->primitives.size();
+  printf("Triangles in scene: %u\n",num_tri);
+  // Allocate the primitives/vertices
+  cudaMalloc((void**)&pos_d,sizeof(gpuVector3D) * num_tri*3);
+  cudaMalloc((void**)&gpu_primitives,sizeof(gpuTriangle) * num_tri);
+  cudaMemcpyToSymbol(pos,&pos_d,sizeof(gpuVector3D*));
+  cudaMemcpyToSymbol(primitives,&gpu_primitives,sizeof(gpuTriangle*));
   cudaMemcpyToSymbol(numPrim,&num_tri,sizeof(size_t));
 
-  const Mesh* cpu_mesh = ((Triangle*)(pathtracer->bvh->primitives[0]))->mesh;
-  size_t numVerts = cpu_mesh->numVerts;
-  printf("numVerts: %d\n",numVerts);
-
-  gpuVector3D* pos_temp = new gpuVector3D[numVerts];
-  
-  for(size_t i = 0; i < numVerts; i++)
-  {
-    pos_temp[i] = gpuVector3D(cpu_mesh->positions[i].x,
-        cpu_mesh->positions[i].y,
-        cpu_mesh->positions[i].z);
-  }
-  // Copy over the vertices and normals of the mesh
-
-  cudaMalloc((void**)&pos_d,sizeof(gpuVector3D) * numVerts);
-
-  cudaMemcpy(pos_d, pos_temp, sizeof(gpuVector3D) * numVerts,
-      cudaMemcpyHostToDevice);
-  cudaMemcpyToSymbol(pos,&pos_d,sizeof(gpuVector3D*));
-
-  // Copy over the triangles
+  // Copy over the triangles and their vertices into gpu versions
   gpuTriangle* temp_tri = new gpuTriangle[num_tri];
-  for(int i = 0; i < num_tri; i++)
+  gpuVector3D* pos_temp = new gpuVector3D[num_tri*3];
+
+  for(size_t i = 0; i < num_tri; i++)
   {
-    temp_tri[i] = gpuTriangle(cpu_mesh,pos_d,
-        ((Triangle*)(pathtracer->bvh->primitives[i]))->v1,
-        ((Triangle*)(pathtracer->bvh->primitives[i]))->v2,
-        ((Triangle*)(pathtracer->bvh->primitives[i]))->v3);
+    // Get the triangle and its vectors
+    size_t offset = i * 3;
+    Triangle* tri = ((Triangle*)(pathtracer->bvh->primitives[i]));
+    Vector3D p1 = tri->mesh->positions[tri->v1];
+    Vector3D p2 = tri->mesh->positions[tri->v2];
+    Vector3D p3 = tri->mesh->positions[tri->v3];
+
+    // Copy over the vectors
+    pos_temp[offset] = gpuVector3D(p1.x,p1.y,p1.z);
+    pos_temp[offset+1] = gpuVector3D(p2.x,p2.y,p2.z);
+    pos_temp[offset+2] = gpuVector3D(p3.x,p3.y,p3.z);
+
+    // Create the gpuTriangle object
+    temp_tri[i] = gpuTriangle(pos_d,offset,offset+1,offset+2);
   }
-  cudaMalloc((void**)&gpu_primitives,sizeof(gpuTriangle) * num_tri);
+
+  // Copy over the vertices and normals of the triangles
+
+
+  cudaMemcpy(pos_d, pos_temp, sizeof(gpuVector3D) * num_tri*3,
+      cudaMemcpyHostToDevice);
+
+
   cudaMemcpy(gpu_primitives,temp_tri,sizeof(gpuTriangle) * num_tri,
       cudaMemcpyHostToDevice);
-  cudaMemcpyToSymbol(primitives,&gpu_primitives,sizeof(gpuTriangle*));
   timer.stop();
 
   printf("[GPU Pathtracer]: finished loading scene (%.4f sec)\n",timer.duration());
@@ -181,8 +185,8 @@ void gpuPathTracer::update_screen()
 void gpuPathTracer::start_raytrace()
 {
   timer.start();
-  size_t numBlocks = (w * h + 31 -1)/32;
-  render<<<numBlocks,32>>>(camera);
+  size_t numBlocks = (w * h + 512 -1)/512;
+  render<<<numBlocks,512>>>(camera);
   cudaDeviceSynchronize();
   timer.stop();
   printf("[GPU Pathtracer]: finished rendering scene (%.4f sec)\n",timer.duration());

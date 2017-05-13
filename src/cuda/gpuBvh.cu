@@ -212,25 +212,25 @@ bool gpuBVHAccel::intersect(const gpuRay& ray)
     else {
       if(left == NULL) {
         //check if right node bounding box intersects, add to stack
-        double t0 = ray.min_t;
-        double t1 = ray.max_t;
+        float t0 = ray.min_t;
+        float t1 = ray.max_t;
         if(right->bb.intersect(ray, t0, t1)) {
           stack.push(right);
         }
       }
       else if(right == NULL) {
         //check if left node intersetcs, add to stack
-        double t0 = ray.min_t;
-        double t1 = ray.max_t;
+        float t0 = ray.min_t;
+        float t1 = ray.max_t;
         if(left->bb.intersect(ray, t0, t1)) {
           stack.push(left);
         }
       }
       else {
-        double t0 = ray.min_t;
-        double t1 = ray.max_t;
-        double t2 = ray.min_t;
-        double t3 = ray.max_t;
+        float t0 = ray.min_t;
+        float t1 = ray.max_t;
+        float t2 = ray.min_t;
+        float t3 = ray.max_t;
         bool leftHit = left->bb.intersect(ray, t0, t1);
         bool rightHit = right->bb.intersect(ray, t2, t3);
 

@@ -8,8 +8,8 @@ struct gpuRay {
 
   gpuVector3D o;
   gpuVector3D d;
-  double min_t;
-  double max_t;
+  float min_t;
+  float max_t;
 
   gpuVector3D inv_d;
   int sign[3];
@@ -26,7 +26,7 @@ struct gpuRay {
   }
 
   __device__
-    inline gpuVector3D at_time(double t){ return o + t * d; }
+    inline gpuVector3D at_time(float t){ return o + t * d; }
 
   /*
   gpuRay transform_by(const gpuMatrix4x4& t) const {
